@@ -1,0 +1,73 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\tableA11_validation.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:49
+
+. use "validationdata";
+(Data from validation study, results in Table A.11 of Online Appendix)
+
+. gen microscopy = 0 if result_clinic=="neg";
+(31 missing values generated)
+
+. replace microscopy = 1 if result_clinic=="Pf";
+(0 real changes made)
+
+. replace microscopy = 2 if result_clinic=="Pv";
+(0 real changes made)
+
+. label define rdt 1 "Pf or mixed" 2 "Pf" 3 "non-Pf" 4 Negative, modify;
+
+. label values result_1-result_3 rdt;
+
+. gen rdt_1 = result_1<4;
+
+. gen rdt_2 = result_2<4;
+
+. gen rdt_3 = result_3<4;
+
+. gen micro = microscopy>0;
+
+. pwcorr rdt_* micro, star(1);
+
+             |    rdt_1    rdt_2    rdt_3    micro
+-------------+------------------------------------
+       rdt_1 |   1.0000 
+       rdt_2 |   0.7873*  1.0000 
+       rdt_3 |   0.7844*  0.8760*  1.0000 
+       micro |   0.5274*  0.6131*  0.5968*  1.0000 
+
+. tab rdt_1 micro;
+
+           |         micro
+     rdt_1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       129          1 |       130 
+         1 |        45         30 |        75 
+-----------+----------------------+----------
+     Total |       174         31 |       205 
+
+
+. tab rdt_2 micro;
+
+           |         micro
+     rdt_2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       148          3 |       151 
+         1 |        26         28 |        54 
+-----------+----------------------+----------
+     Total |       174         31 |       205 
+
+
+. tab rdt_3 micro;
+
+           |         micro
+     rdt_3 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       146          3 |       149 
+         1 |        28         28 |        56 
+-----------+----------------------+----------
+     Total |       174         31 |       205 
+
+
+. cap log close;

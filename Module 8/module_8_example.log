@@ -1,0 +1,208 @@
+
+  ___  ____  ____  ____  ____ (R)
+ /__    /   ____/   /   ____/
+___/   /   /___/   /   /___/   15.1   Copyright 1985-2017 StataCorp LLC
+  Statistics/Data Analysis            StataCorp
+                                      4905 Lakeway Drive
+     MP - Parallel Edition            College Station, Texas 77845 USA
+                                      800-STATA-PC        http://www.stata.com
+                                      979-696-4600        stata@stata.com
+                                      979-696-4601 (fax)
+
+280-user 2-core Stata network license expires 17 Nov 2019:
+       Serial number:  501509229274
+         Licensed to:  hbsuser
+                       Harvard Business School
+
+Notes:
+      1.  Stata is running in batch mode.
+      2.  Unicode is supported; see help unicode_advice.
+      3.  More than 2 billion observations are allowed; see help obs_advice.
+      4.  Maximum number of variables is set to 5000; see help set_maxvar.
+
+. do "module_8_example.do" 
+
+. *Change the current directory to YOUR Module 8 folder 
+. cd "/mass_storage/WB/Module 8"
+/mass_storage/WB/Module 8
+
+. 
+. //Task 1 
+. set more off 
+
+. drop _all 
+
+. 
+. use "Data/Code & Result/AEA_P&P_table.dta", clear 
+
+. 
+. describe 
+
+Contains data from Data/Code & Result/AEA_P&P_table.dta
+  obs:        18,937                          
+ vars:            23                          12 Jan 2018 12:33
+ size:     3,654,841                          
+-------------------------------------------------------------------------------
+              storage   display    value
+variable name   type    format     label      variable label
+-------------------------------------------------------------------------------
+id              float   %9.0g                 group(id)
+year            double  %10.0g              * year
+t_Revenue       double  %10.0g                TotalRevenue
+t_Assets        double  %10.0g                Assets
+t_CurrentLiab~y double  %10.0g                CurrentLiability
+t_ROA           float   %9.0g                 ROA, returns on assets
+t_EBIT          float   %9.0g                 
+Nnindcd         str13   %13s                  Nnindcd
+Nindnme         str51   %51s                  Nindnme
+Indcd           str13   %13s                  Indcd
+province        str24   %24s                  province
+region          float   %9.0g                 carbon ETS pilot regions
+Ind             float   %9.0g                 covered ETS sectors
+post            float   %9.0g                 post announcement year of 2011
+price           float   %9.0g                 carbo price across pilots
+turnover        float   %9.0g                 turnover rates acorss pilots
+logNon_envrAEW  float   %9.0g                 log count of non-low-caron
+                                                patents
+logNon_envrAE   float   %9.0g                 log count of non-low-caron
+                                                patents in narrowed definition
+logenvrAEW      float   %9.0g                 log count of low-carbon patents
+logenvrAEWRD    float   %9.0g                 log count of low-carbon patents
+                                                per RD expenditure
+logenvrAE       float   %9.0g                 log count of low-carbon patents
+                                                in narrowed defintion
+logenvrAERD     float   %9.0g                 log count of low-carbon patents
+                                                in narrowed definition per RD
+                                                expenditure
+envrAEW_ratio   float   %9.0g                 low-carbon patents ratio
+                                            * indicated variables have notes
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. 
+. //Task 2 
+. label define post 0 "Before ETS" 1 "After ETS"
+
+. label val post post 
+
+. 
+. label define region 0 "Non-ETS region" 1 "ETS region"
+
+. label val region region
+
+. 
+. regress logenvrAEW post##region, cluster(id)
+
+Linear regression                               Number of obs     =     18,937
+                                                F(3, 1955)        =     193.83
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0557
+                                                Root MSE          =     .69259
+
+                                 (Std. Err. adjusted for 1,956 clusters in id)
+------------------------------------------------------------------------------
+             |               Robust
+  logenvrAEW |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        post |
+  After ETS  |   .2963886   .0146725    20.20   0.000     .2676132     .325164
+             |
+      region |
+ ETS region  |    .099148   .0257738     3.85   0.000     .0486009    .1496951
+             |
+ post#region |
+  After ETS #|
+ ETS region  |   .0613632   .0322132     1.90   0.057    -.0018126     .124539
+             |
+       _cons |      .1121   .0083942    13.35   0.000     .0956375    .1285624
+------------------------------------------------------------------------------
+
+. 
+. 
+. 
+. regress logenvrAEW post##region##Ind, cluster(id)
+
+Linear regression                               Number of obs     =     18,937
+                                                F(7, 1955)        =      85.09
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0567
+                                                Root MSE          =      .6923
+
+                                 (Std. Err. adjusted for 1,956 clusters in id)
+------------------------------------------------------------------------------
+             |               Robust
+  logenvrAEW |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        post |
+  After ETS  |   .3160909   .0194982    16.21   0.000     .2778514    .3543304
+             |
+      region |
+ ETS region  |   .0922392   .0293051     3.15   0.002     .0347666    .1497117
+             |
+ post#region |
+  After ETS #|
+ ETS region  |   .0311227   .0371755     0.84   0.403    -.0417851    .1040305
+             |
+       1.Ind |  -.0164661   .0164269    -1.00   0.316    -.0486822      .01575
+             |
+    post#Ind |
+After ETS#1  |  -.0584792   .0283221    -2.06   0.039    -.1140239   -.0029346
+             |
+  region#Ind |
+ ETS region #|
+          1  |   .0182643   .0612734     0.30   0.766    -.1019038    .1384324
+             |
+ post#region#|
+         Ind |
+  After ETS #|
+ ETS region #|
+          1  |    .099368   .0753051     1.32   0.187    -.0483187    .2470547
+             |
+       _cons |   .1185004   .0115307    10.28   0.000     .0958866    .1411142
+------------------------------------------------------------------------------
+
+. 
+. 
+. regress logNon_envrAEW post##region##Ind, cluster(id)
+
+Linear regression                               Number of obs     =     18,937
+                                                F(7, 1955)        =     278.18
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1445
+                                                Root MSE          =     1.5344
+
+                                 (Std. Err. adjusted for 1,956 clusters in id)
+------------------------------------------------------------------------------
+             |               Robust
+logNon_env~W |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        post |
+  After ETS  |   1.242348   .0418401    29.69   0.000     1.160292    1.324404
+             |
+      region |
+ ETS region  |   .3378946   .0882239     3.83   0.000     .1648717    .5109174
+             |
+ post#region |
+  After ETS #|
+ ETS region  |  -.0999072   .0813343    -1.23   0.219    -.2594183    .0596038
+             |
+       1.Ind |  -.2777637   .0569229    -4.88   0.000    -.3893998   -.1661277
+             |
+    post#Ind |
+After ETS#1  |     -.2199   .0618743    -3.55   0.000    -.3412464   -.0985535
+             |
+  region#Ind |
+ ETS region #|
+          1  |  -.0927338   .1547704    -0.60   0.549    -.3962662    .2107985
+             |
+ post#region#|
+         Ind |
+  After ETS #|
+ ETS region #|
+          1  |   .1641406   .1397631     1.17   0.240    -.1099597    .4382408
+             |
+       _cons |   .9161575   .0394037    23.25   0.000     .8388799    .9934352
+------------------------------------------------------------------------------
+
+. 
+end of do-file

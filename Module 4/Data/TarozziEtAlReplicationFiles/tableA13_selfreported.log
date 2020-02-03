@@ -1,0 +1,454 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\tableA13_selfreported.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:57
+
+. *** Generates the results in Table A.13: Self-reported Malaria Indices: Baseline and Follow-up Differences in Levels;
+. use "panel_biomarkers";
+
+. cap program drop mydisplay;
+
+. prog define mydisplay;
+  1.         qui reg `1' arm_free arm_mf if match==1, cluster(id_v);
+  2.         local clusters = e(N_clust);
+  3.         qui test arm_free arm_mf;
+  4.         local t = r(p);
+  5.         qui test arm_free = arm_mf;
+  6.         local equal = r(p);
+  7.         matrix results = _b[arm_free]\_se[arm_free]\_b[arm_mf]\_se[arm_mf]\_b[_cons]\_se[_cons]\e(N)\ `t'\ `equal';
+  8.         mat list results, format(%8.3f);
+  9. end;
+
+. *** FIRST THE RESULTS IN COLUMNS 1-4 OF THE TOP PANEL, USING SELF-REPORTED MALARIA EPISODES;
+. *** Column (1) "Current" malaria, baseline;
+. mydisplay survey_m_now0;
+
+results[9,1]
+          c1
+r1     0.001
+r2     0.002
+r3     0.002
+r4     0.003
+r5     0.008
+r6     0.002
+r7  9684.000
+r8     0.699
+r9     0.780
+
+. *** Column (2) "Current" malaria, followup;
+. mydisplay survey_m_now1;
+
+results[9,1]
+          c1
+r1    -0.001
+r2     0.003
+r3     0.001
+r4     0.003
+r5     0.007
+r6     0.002
+r7  9598.000
+r8     0.925
+r9     0.693
+
+. *** Column (3) # of malaria episodes last 6 months, baseline;
+. mydisplay survey_m60;
+
+results[9,1]
+          c1
+r1     0.032
+r2     0.015
+r3     0.031
+r4     0.015
+r5     0.092
+r6     0.009
+r7  9684.000
+r8     0.040
+r9     0.949
+
+. *** Column (4) # of malaria episodes last 6 months, follow-up;
+. mydisplay survey_m61;
+
+results[9,1]
+          c1
+r1    -0.011
+r2     0.019
+r3    -0.018
+r4     0.017
+r5     0.115
+r6     0.013
+r7  9598.000
+r8     0.579
+r9     0.684
+
+. **** NOW THE RESULTS FOR THE BOTTOM PANEL, AGAIN COLUMNS 1-4, FOR SELF-REPORTED MALARIA AND FEVER POOLED TOGETHER;
+. *** Column (1) "Current" malaria / fever, baseline;
+. mydisplay survey_mf_now0;
+
+results[9,1]
+          c1
+r1    -0.000
+r2     0.006
+r3     0.003
+r4     0.006
+r5     0.026
+r6     0.004
+r7  9684.000
+r8     0.861
+r9     0.629
+
+. *** Column (2) "Current" malaria / fever, followup;
+. mydisplay survey_mf_now1;
+
+results[9,1]
+          c1
+r1    -0.006
+r2     0.007
+r3     0.005
+r4     0.007
+r5     0.036
+r6     0.005
+r7  9598.000
+r8     0.274
+r9     0.114
+
+. *** Column (3) # of malaria / fever episodes last 6 months, baseline;
+. mydisplay survey_mf60;
+
+results[9,1]
+          c1
+r1     0.021
+r2     0.021
+r3     0.041
+r4     0.022
+r5     0.215
+r6     0.015
+r7  9684.000
+r8     0.179
+r9     0.382
+
+. *** Column (4) # of malaria / fever  episodes last 6 months, follow-up;
+. mydisplay survey_mf61;
+
+results[9,1]
+          c1
+r1    -0.049
+r2     0.040
+r3    -0.069
+r4     0.037
+r5     0.458
+r6     0.028
+r7  9598.000
+r8     0.167
+r9     0.577
+
+. *****************************************************************************************************************
+> *** THE RESULTS OF THE ESTIMATES ARE AT THE HOUSEHOLD LEVEL, SO NEED TO COLLAPSE BY HOUSEHOLDS BEFORE ESTIMATION;
+. keep if match==1;
+(7971 observations deleted)
+
+. collapse match arm_free arm_mf (sum) cost*, by(id_v id_hhno);
+
+. *** Now columns 5-14, top panel, malaria only;
+. *** Column (5) # Days of work/school lost for malaria last 6 m, baseline;
+. mydisplay cost_m_days0;
+
+results[9,1]
+          c1
+r1     0.713
+r2     0.854
+r3     0.920
+r4     0.928
+r5     4.267
+r6     0.572
+r7  1768.000
+r8     0.550
+r9     0.831
+
+. *** Column (6) # Days of work/school lost for malaria last 6 m, follow-up;
+. mydisplay cost_m_days1;
+
+results[9,1]
+          c1
+r1    -1.231
+r2     1.086
+r3    -1.475
+r4     0.985
+r5     5.779
+r6     0.833
+r7  1768.000
+r8     0.322
+r9     0.781
+
+. *** Column (7) Tot. exp. (2008/09 Rs) for malaria last 6 m (itemized), baseline;
+. mydisplay cost_m_expit0;
+
+results[9,1]
+          c1
+r1   189.136
+r2   121.296
+r3   163.269
+r4   131.012
+r5   624.621
+r6    85.743
+r7  1768.000
+r8     0.252
+r9     0.844
+
+. *** Column (8) Tot. exp. (2008/09 Rs) for malaria last 6 m (itemized), follow-up;
+. mydisplay cost_m_expit1;
+
+results[9,1]
+          c1
+r1    -4.883
+r2   177.598
+r3  -106.013
+r4   160.539
+r5   862.793
+r6   119.232
+r7  1768.000
+r8     0.757
+r9     0.553
+
+. *** Column (9) Total doctors/drugs expenditure (2008/09 Rs) for malaria last 6 m, baseline;
+. mydisplay cost_m_expdd0;
+
+results[9,1]
+          c1
+r1   105.684
+r2    65.230
+r3   112.097
+r4    67.442
+r5   317.984
+r6    42.672
+r7  1768.000
+r8     0.153
+r9     0.929
+
+. *** Column (10) Total doctors/drugs expenditure (2008/09 Rs) for malaria last 6 m, follow-up;
+. mydisplay cost_m_expdd1;
+
+results[9,1]
+          c1
+r1    19.724
+r2   103.957
+r3   -75.147
+r4    86.370
+r5   486.793
+r6    62.543
+r7  1768.000
+r8     0.562
+r9     0.355
+
+. *** Column (11) # times debt due to malaria episodes last 6 m, baseline;
+. mydisplay cost_m_debt0;
+
+results[9,1]
+          c1
+r1     0.082
+r2     0.043
+r3     0.032
+r4     0.033
+r5     0.151
+r6     0.022
+r7  1768.000
+r8     0.156
+r9     0.265
+
+. *** Column (12) # times debt due to malaria episodes last 6 m, follow-up;
+. mydisplay cost_m_debt1;
+
+results[9,1]
+          c1
+r1    -0.033
+r2     0.051
+r3    -0.079
+r4     0.045
+r5     0.220
+r6     0.038
+r7  1768.000
+r8     0.186
+r9     0.276
+
+. *** Column (13) # times reduction in cons. due to malaria episodes last 6 m, baseline;
+. mydisplay cost_m_less0;
+
+results[9,1]
+          c1
+r1     0.093
+r2     0.053
+r3     0.090
+r4     0.053
+r5     0.244
+r6     0.031
+r7  1768.000
+r8     0.111
+r9     0.957
+
+. *** Column (14) # times reduction in cons. due to malaria episodes last 6 m, follow-up;
+. mydisplay cost_m_less1;
+
+results[9,1]
+          c1
+r1    -0.023
+r2     0.021
+r3     0.003
+r4     0.026
+r5     0.069
+r6     0.017
+r7  1768.000
+r8     0.407
+r9     0.269
+
+. *** And finally again columns 5-14, BOTTOM panel, MALARIA/FEVER pooled together;
+. *** Column (5) # Days of work/school lost for malaria/fever last 6 m, baseline;
+. mydisplay cost_mf_days0;
+
+results[9,1]
+          c1
+r1    -0.334
+r2     1.055
+r3     1.236
+r4     1.174
+r5     7.847
+r6     0.788
+r7  1768.000
+r8     0.359
+r9     0.162
+
+. *** Column (6) # Days of work/school lost for malaria/fever last 6 m, follow-up;
+. mydisplay cost_mf_days1;
+
+results[9,1]
+          c1
+r1    -3.213
+r2     1.540
+r3    -3.571
+r4     1.369
+r5    13.125
+r6     1.190
+r7  1768.000
+r8     0.033
+r9     0.764
+
+. *** Column (7) Tot. exp. (2008/09 Rs) for malaria/fever last 6 m (itemized), baseline;
+. mydisplay cost_mf_expit0;
+
+results[9,1]
+          c1
+r1     7.725
+r2   140.907
+r3   230.336
+r4   162.334
+r5  1101.407
+r6   107.979
+r7  1768.000
+r8     0.274
+r9     0.143
+
+. *** Column (8) Tot. exp. (2008/09 Rs) for malaria/fever last 6 m (itemized), follow-up;
+. mydisplay cost_mf_expit1;
+
+results[9,1]
+          c1
+r1  -216.891
+r2   255.490
+r3  -344.250
+r4   237.985
+r5  2011.308
+r6   183.756
+r7  1768.000
+r8     0.353
+r9     0.586
+
+. *** Column (9) Total doctors/drugs expenditure (2008/09 Rs) for malaria/fever last 6 m, baseline;
+. mydisplay cost_mf_expdd0;
+
+results[9,1]
+          c1
+r1    12.524
+r2    80.363
+r3   142.859
+r4    90.110
+r5   565.839
+r6    61.681
+r7  1768.000
+r8     0.211
+r9     0.121
+
+. *** Column (10) Total doctors/drugs expenditure (2008/09 Rs) for malaria/fever last 6 m, follow-up;
+. mydisplay cost_mf_expdd1;
+
+results[9,1]
+          c1
+r1   -74.636
+r2   144.742
+r3  -193.088
+r4   132.150
+r5  1111.044
+r6    98.598
+r7  1768.000
+r8     0.335
+r9     0.391
+
+. *** Column (11) # times debt due to malaria/fever episodes last 6 m, baseline;
+. mydisplay cost_mf_debt0;
+
+results[9,1]
+          c1
+r1     0.054
+r2     0.060
+r3     0.032
+r4     0.059
+r5     0.315
+r6     0.040
+r7  1768.000
+r8     0.657
+r9     0.714
+
+. *** Column (12) # times debt due to malaria/fever episodes last 6 m, follow-up;
+. mydisplay cost_mf_debt1;
+
+results[9,1]
+          c1
+r1    -0.135
+r2     0.111
+r3    -0.186
+r4     0.117
+r5     0.691
+r6     0.088
+r7  1768.000
+r8     0.269
+r9     0.618
+
+. *** Column (13) # times reduction in cons. due to malaria/fever episodes last 6 m, baseline;
+. mydisplay cost_mf_less0;
+
+results[9,1]
+          c1
+r1     0.111
+r2     0.089
+r3     0.146
+r4     0.086
+r5     0.613
+r6     0.060
+r7  1768.000
+r8     0.215
+r9     0.704
+
+. *** Column (14) # times reduction in cons. due to malaria/fever episodes last 6 m, follow-up;
+. mydisplay cost_mf_less1;
+
+results[9,1]
+          c1
+r1    -0.057
+r2     0.074
+r3     0.013
+r4     0.080
+r5     0.262
+r6     0.055
+r7  1768.000
+r8     0.608
+r9     0.363
+
+. cap log close;

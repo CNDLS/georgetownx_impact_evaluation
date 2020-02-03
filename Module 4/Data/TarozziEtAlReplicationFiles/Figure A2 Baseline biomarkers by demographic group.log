@@ -1,0 +1,180 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\Figure A2 Baseline biomarkers by demographic group.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:05:19
+
+. use "panel_biomarkers" if vtype<=3;
+
+. * This uses data from all households at baseline (not only panel households);
+. * First generate a dummy for anemic individuals (Hb<11 g/dl blood, as defined in the paper);
+. gen an = hb0<11 if hb0<.;
+(16037 missing values generated)
+
+. recode age0 (0/4 = 1 "U5") (15/44 = 2 "15 to 45") (45/100=3 "45 or older") (5/14=.)
+>         , label(newagegroup) generate(newagegroup);
+(9892 differences between age0 and newagegroup)
+
+. graph bar (mean) an (mean) m0, over(sex0) over(newagegroup) legend(label(1 "Anemia (Hb<11)") label(2 "Malaria"));
+
+. * Count non-missing observations for anemia/Hb and malaria prevalence (caption of Figure A1);
+. sum m0;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+          m0 |      2561    .1151894    .3193127          0          1
+
+. sum hb0;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+         hb0 |      2532    10.89451    1.904109        3.3       19.4
+
+. * Now test equality of biomarkers by gender for each age group;
+. forvalues newagegroup = 1/3 {;
+  2.         reg m0 female if newagegroup == `newagegroup', cluster(id_v);
+  3.         reg hb0 female if newagegroup == `newagegroup', cluster(id_v);
+  4.         reg an female if newagegroup == `newagegroup', cluster(id_v);
+  5. };
+
+Linear regression                                      Number of obs =     646
+                                                       F(  1,   137) =    0.72
+                                                       Prob > F      =  0.3985
+                                                       R-squared     =  0.0009
+                                                       Root MSE      =  .31117
+
+                                 (Std. Err. adjusted for 138 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |   .0190058   .0224409     0.85   0.399    -.0253694    .0633811
+       _cons |   .0994152   .0183703     5.41   0.000     .0630892    .1357412
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =     639
+                                                       F(  1,   136) =    0.23
+                                                       Prob > F      =  0.6342
+                                                       R-squared     =  0.0004
+                                                       Root MSE      =  1.3621
+
+                                 (Std. Err. adjusted for 137 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         hb0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |  -.0559977   .1174102    -0.48   0.634    -.2881834    .1761881
+       _cons |   9.957313   .0799133   124.60   0.000      9.79928    10.11535
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =     639
+                                                       F(  1,   136) =    0.80
+                                                       Prob > F      =  0.3733
+                                                       R-squared     =  0.0014
+                                                       Root MSE      =   .4052
+
+                                 (Std. Err. adjusted for 137 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          an |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |    .030106   .0337036     0.89   0.373    -.0365449     .096757
+       _cons |   .7791045   .0244726    31.84   0.000     .7307084    .8275005
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =    1615
+                                                       F(  1,   140) =    5.69
+                                                       Prob > F      =  0.0184
+                                                       R-squared     =  0.0028
+                                                       Root MSE      =    .327
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |    .039259   .0164618     2.38   0.018     .0067132    .0718048
+       _cons |   .0933941    .014562     6.41   0.000     .0646042    .1221839
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =    1596
+                                                       F(  1,   140) =  622.35
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.2729
+                                                       Root MSE      =  1.6825
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         hb0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |  -2.316672   .0928641   -24.95   0.000     -2.50027   -2.133075
+       _cons |   12.95081   .0988356   131.03   0.000     12.75541    13.14621
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =    1596
+                                                       F(  1,   140) =  462.36
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.1556
+                                                       Root MSE      =  .45566
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          an |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |   .4397165   .0204495    21.50   0.000     .3992868    .4801462
+       _cons |    .113164   .0162361     6.97   0.000     .0810643    .1452637
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =     292
+                                                       F(  1,   116) =    0.83
+                                                       Prob > F      =  0.3651
+                                                       R-squared     =  0.0032
+                                                       Root MSE      =  .29021
+
+                                 (Std. Err. adjusted for 117 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |   .0329681   .0362612     0.91   0.365    -.0388518     .104788
+       _cons |   .0746269   .0274396     2.72   0.008     .0202794    .1289744
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =     289
+                                                       F(  1,   115) =   69.17
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.2179
+                                                       Root MSE      =  1.6062
+
+                                 (Std. Err. adjusted for 116 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         hb0 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |  -1.695166   .2038298    -8.32   0.000    -2.098913   -1.291418
+       _cons |   11.91504   .1649129    72.25   0.000     11.58838     12.2417
+------------------------------------------------------------------------------
+
+Linear regression                                      Number of obs =     289
+                                                       F(  1,   115) =   88.89
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.2245
+                                                       Root MSE      =  .44173
+
+                                 (Std. Err. adjusted for 116 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          an |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      female |   .4751301   .0503935     9.43   0.000     .3753103    .5749499
+       _cons |   .2556391   .0401546     6.37   0.000     .1761006    .3351776
+------------------------------------------------------------------------------
+
+. log close;
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\Figure A2 Baseline biomarkers by demographic group.log
+  log type:  text
+ closed on:  12 Oct 2013, 13:05:23
+---------------------------------------------------------------------------------------------------------------------------------------

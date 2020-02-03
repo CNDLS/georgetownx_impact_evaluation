@@ -1,0 +1,483 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table5_biomarkers.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:21
+
+. ** THIS FILE GENERATES THE RESULTS IN TABLE 5 OF THE PAPER;
+. * As usual use only information from panel households present both at baseline and at follow-up (that is, match==1);
+. use "panel_biomarkers" if match==1;
+
+. * Column 1, Malaria prevalence, follow-up only;
+. reg m1 arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    7154
+                                                       F(  2,   140) =    1.05
+                                                       Prob > F      =  0.3538
+                                                       R-squared     =  0.0022
+                                                       Root MSE      =  .40732
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0366819   .0299121     1.23   0.222    -.0224559    .0958196
+      arm_mf |   .0439062   .0352621     1.25   0.215    -.0258088    .1136212
+       _cons |   .1834268   .0220048     8.34   0.000     .1399222    .2269314
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.05
+            Prob > F =    0.3538
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+          m1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0072243   .0342013    -0.21   0.833    -.0748421    .0603934
+------------------------------------------------------------------------------
+
+. * Column 2, Malaria prevalence, DD;
+. gen dm = m1 - m0;
+(8701 missing values generated)
+
+. reg dm arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1897
+                                                       F(  2,   140) =    1.50
+                                                       Prob > F      =  0.2268
+                                                       R-squared     =  0.0037
+                                                       Root MSE      =  .45349
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0545279   .0397957     1.37   0.173    -.0241503    .1332061
+      arm_mf |    .062989   .0391343     1.61   0.110    -.0143815    .1403595
+       _cons |   .0632091   .0281798     2.24   0.026     .0074962     .118922
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.50
+            Prob > F =    0.2268
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0084611   .0390767    -0.22   0.829    -.0857179    .0687957
+------------------------------------------------------------------------------
+
+. * Column 3, Hemoglobin (Hb), follow-up only;
+. reg hb1 arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    7149
+                                                       F(  2,   140) =    0.13
+                                                       Prob > F      =  0.8749
+                                                       R-squared     =  0.0001
+                                                       Root MSE      =   1.907
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         hb1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0332045   .1049194    -0.32   0.752    -.2406359    .1742268
+      arm_mf |   .0225632   .0942719     0.24   0.811    -.1638174    .2089439
+       _cons |   11.43348   .0643102   177.79   0.000     11.30633    11.56062
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.13
+            Prob > F =    0.8749
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+         hb1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0557678   .1078132    -0.52   0.606    -.2689202    .1573847
+------------------------------------------------------------------------------
+
+. * Column 4, Malaria prevalence, DD;
+. gen dhb = hb1 - hb0;
+(8728 missing values generated)
+
+. reg dhb arm_free arm_mf if sample_panel==1, cluster(id_v);
+
+Linear regression                                      Number of obs =    1869
+                                                       F(  2,   140) =    2.32
+                                                       Prob > F      =  0.1025
+                                                       R-squared     =  0.0036
+                                                       Root MSE      =   1.611
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         dhb |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .2221438   .1070121     2.08   0.040     .0105752    .4337124
+      arm_mf |   .0460037   .1228874     0.37   0.709    -.1969513    .2889588
+       _cons |   .2769231   .0749748     3.69   0.000     .1286939    .4251522
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    2.32
+            Prob > F =    0.1025
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+         dhb |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |     .17614   .1237355     1.42   0.157    -.0684917    .4207717
+------------------------------------------------------------------------------
+
+. * The results without imposing sample_panel==1 are almost identical (one obs. with problematic matching between baseline and followup
+>  is not dropped);
+. reg dhb arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1870
+                                                       F(  2,   140) =    2.45
+                                                       Prob > F      =  0.0900
+                                                       R-squared     =  0.0037
+                                                       Root MSE      =  1.6143
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         dhb |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .2299492    .107027     2.15   0.033      .018351    .4415474
+      arm_mf |   .0538092   .1229005     0.44   0.662    -.1891716      .29679
+       _cons |   .2691177   .0749962     3.59   0.000     .1208462    .4173891
+------------------------------------------------------------------------------
+
+. * Column 5, Anemia (that is, Hb<11), follow-up only;
+. gen an1 = hb1<11 if hb1<.;
+(3449 missing values generated)
+
+. reg an1 arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    7149
+                                                       F(  2,   140) =    0.10
+                                                       Prob > F      =  0.9043
+                                                       R-squared     =  0.0001
+                                                       Root MSE      =  .48761
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         an1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0095915   .0218558     0.44   0.661    -.0336186    .0528015
+      arm_mf |   .0048716   .0206145     0.24   0.814    -.0358843    .0456276
+       _cons |   .3840173   .0123175    31.18   0.000     .3596649    .4083697
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.10
+            Prob > F =    0.9043
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+         an1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0047198   .0244784     0.19   0.847    -.0436752    .0531149
+------------------------------------------------------------------------------
+
+. * Column 6, Anemia, DD;
+. gen an0 = hb0<11 if hb0<.;
+(8177 missing values generated)
+
+. gen dan = an1 - an0;
+(8728 missing values generated)
+
+. reg dan arm_free arm_mf if sample_panel==1, cluster(id_v);
+
+Linear regression                                      Number of obs =    1869
+                                                       F(  2,   140) =    1.43
+                                                       Prob > F      =  0.2437
+                                                       R-squared     =  0.0021
+                                                       Root MSE      =  .53449
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         dan |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0240103    .033188    -0.72   0.471    -.0896248    .0416042
+      arm_mf |   .0348702   .0353933     0.99   0.326    -.0351042    .1048446
+       _cons |   -.111293   .0238452    -4.67   0.000    -.1584363   -.0641497
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.43
+            Prob > F =    0.2437
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+         dan |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0588805   .0348847    -1.69   0.094    -.1278494    .0100883
+------------------------------------------------------------------------------
+
+. * Again the results are almost identical if the observation for which sample_panel=0 is not dropped;
+. reg dan arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1870
+                                                       F(  2,   140) =    1.42
+                                                       Prob > F      =  0.2441
+                                                       R-squared     =  0.0020
+                                                       Root MSE      =  .53496
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         dan |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0258261   .0334246    -0.77   0.441    -.0919084    .0402562
+      arm_mf |   .0330544   .0356152     0.93   0.355    -.0373589    .1034676
+       _cons |  -.1094771   .0241735    -4.53   0.000    -.1572694   -.0616849
+------------------------------------------------------------------------------
+
+. * Column 7, Malaria, follow-up only, with tester FE;
+. xi: reg m1 arm_free arm_mf i.bloodtester, cluster(id_v);
+i.bloodtester     _Ibloodtest_1-10    (_Ibloodtest_1 for b~ter==JITESH KUMAR MAHARANA omitted)
+
+Linear regression                                      Number of obs =    7154
+                                                       F( 11,   140) =   11.93
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.0477
+                                                       Root MSE      =  .39816
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0206404   .0260104     0.79   0.429    -.0307836    .0720644
+      arm_mf |    .022604   .0293775     0.77   0.443    -.0354769     .080685
+_Ibloodtes~2 |  -.2923051   .0443574    -6.59   0.000    -.3800021   -.2046081
+_Ibloodtes~3 |  -.3572609    .040812    -8.75   0.000    -.4379484   -.2765735
+_Ibloodtes~4 |   -.137116   .0461946    -2.97   0.004    -.2284452   -.0457869
+_Ibloodtes~5 |  -.2011936   .0475361    -4.23   0.000     -.295175   -.1072122
+_Ibloodtes~6 |  -.2193833   .0436394    -5.03   0.000    -.3056608   -.1331059
+_Ibloodtes~7 |  -.1286071   .0530112    -2.43   0.017     -.233413   -.0238012
+_Ibloodtes~8 |   -.300984   .0428691    -7.02   0.000    -.3857385   -.2162295
+_Ibloodtes~9 |  -.1909386   .0593574    -3.22   0.002    -.3082914   -.0735858
+_Ibloodte~10 |  -.1698522   .0652393    -2.60   0.010    -.2988338   -.0408706
+       _cons |   .3797648   .0427018     8.89   0.000     .2953411    .4641885
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.41
+            Prob > F =    0.6626
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.00
+            Prob > F =    0.9449
+
+. * Column 8, Malaria, DD, with tester FE;
+. xi: reg dm arm_free arm_mf i.bloodtester, cluster(id_v);
+i.bloodtester     _Ibloodtest_1-10    (_Ibloodtest_1 for b~ter==JITESH KUMAR MAHARANA omitted)
+
+Linear regression                                      Number of obs =    1897
+                                                       F( 11,   140) =    6.24
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.0422
+                                                       Root MSE      =   .4457
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0363942   .0358221     1.02   0.311     -.034428    .1072163
+      arm_mf |   .0459746   .0355593     1.29   0.198    -.0243281    .1162773
+_Ibloodtes~2 |  -.2865134   .0539304    -5.31   0.000    -.3931366   -.1798902
+_Ibloodtes~3 |    -.36034   .0947587    -3.80   0.000    -.5476831   -.1729969
+_Ibloodtes~4 |  -.0859108    .053848    -1.60   0.113    -.1923713    .0205496
+_Ibloodtes~5 |  -.1866939   .0679678    -2.75   0.007    -.3210699    -.052318
+_Ibloodtes~6 |   -.205677   .0531818    -3.87   0.000    -.3108202   -.1005338
+_Ibloodtes~7 |  -.0041343   .0684531    -0.06   0.952    -.1394698    .1312013
+_Ibloodtes~8 |  -.2556899   .0461575    -5.54   0.000    -.3469457   -.1644341
+_Ibloodtes~9 |  -.1265671   .0655178    -1.93   0.055    -.2560992     .002965
+_Ibloodte~10 |  -.1818318     .06708    -2.71   0.008    -.3144526   -.0492111
+       _cons |   .2273925   .0473981     4.80   0.000     .1336838    .3211012
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.92
+            Prob > F =    0.4014
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.07
+            Prob > F =    0.7854
+
+. * Column 9, Malaria, follow-up only, with controls for IRS spraying (need to import data on this from follow-up household-level data)
+> ;
+. merge m:1 id_v id_hhno using "hhinfo_fup";
+(label treatment already defined)
+(label district already defined)
+(label match already defined)
+(label yesno already defined)
+(label negatives already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             7
+        from master                         0  (_merge==1)
+        from using                          7  (_merge==2)
+
+    matched                            10,598  (_merge==3)
+    -----------------------------------------
+
+. gen innermissing = innerspray==.;
+
+. gen outermissing = outerspray==.;
+
+. recode innerspray .=0;
+(innerspray: 341 changes made)
+
+. recode outerspray .=0;
+(outerspray: 301 changes made)
+
+. xi: reg m1 arm_free arm_mf inner* outer*, cluster(id_v);
+
+Linear regression                                      Number of obs =    7154
+                                                       F(  6,   140) =    2.42
+                                                       Prob > F      =  0.0293
+                                                       R-squared     =  0.0050
+                                                       Root MSE      =  .40685
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          m1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0354569   .0297995     1.19   0.236    -.0234583    .0943721
+      arm_mf |    .039994   .0346813     1.15   0.251    -.0285728    .1085607
+  innerspray |  -.0640532   .0231948    -2.76   0.007    -.1099105   -.0181958
+innermissing |   .0277694   .0517984     0.54   0.593    -.0746387    .1301775
+  outerspray |   .0458692   .0271383     1.69   0.093    -.0077847    .0995232
+outermissing |  -.0171374   .0594725    -0.29   0.774    -.1347178     .100443
+       _cons |   .1854229   .0254721     7.28   0.000     .1350632    .2357826
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.94
+            Prob > F =    0.3917
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.02
+            Prob > F =    0.8937
+
+. * Column 10, Malaria, DD, with controls for IRS spraying;
+. xi: reg dm arm_free arm_mf inner* outer*, cluster(id_v);
+
+Linear regression                                      Number of obs =    1897
+                                                       F(  6,   140) =    0.95
+                                                       Prob > F      =  0.4636
+                                                       R-squared     =  0.0045
+                                                       Root MSE      =  .45378
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .0542882   .0400369     1.36   0.177    -.0248668    .1334433
+      arm_mf |    .060893   .0394893     1.54   0.125    -.0171794    .1389655
+  innerspray |  -.0230809   .0416993    -0.55   0.581    -.1055227    .0593609
+innermissing |   .0514231    .093085     0.55   0.582    -.1326109     .235457
+  outerspray |   .0143015   .0456418     0.31   0.754    -.0759348    .1045379
+outermissing |  -.1026391   .1022434    -1.00   0.317    -.3047798    .0995016
+       _cons |   .0659773   .0312189     2.11   0.036     .0042559    .1276988
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.41
+            Prob > F =    0.2485
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.03
+            Prob > F =    0.8667
+
+. log close;
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table5_biomarkers.log
+  log type:  text
+ closed on:  12 Oct 2013, 13:06:21
+---------------------------------------------------------------------------------------------------------------------------------------

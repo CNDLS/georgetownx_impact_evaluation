@@ -1,0 +1,139 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\tableA7_census.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:30
+
+. * The file censusdata includes village-specific characteristics and amenities at the village level from Census of India 2001;
+. use "censusdata";
+(Data on village characteristics and amenities from 2001 Census of India)
+
+. gen arm_c = vtype==1;
+
+. gen arm_mf = vtype==3;
+
+. gen arm_free = vtype==2;
+
+. gen notinbaseline = 1 - arm_mf - arm_free - arm_c;
+
+. gen sharesc = sc_p/t_p;
+(361 missing values generated)
+
+. gen sharest = st_p/t_p;
+(361 missing values generated)
+
+. gen sharef = t_f/t_p;
+(361 missing values generated)
+
+. gen sc_primary =  p_sch > 0;
+
+. gen sc_middle = m_sch > 0;
+
+. gen sc_secondary = s_sch > 0;
+
+. gen hospital =  all_hosp > 0;
+
+. gen shareirr = tot_irr/area;
+(116 missing values generated)
+
+. gen shareunirr = un_irr/area;
+(116 missing values generated)
+
+. reg area notinbaseline arm_c arm_free arm_mf, robust nocons;
+
+Linear regression                                      Number of obs =    8991
+                                                       F(  4,  8987) = 2449.63
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.5227
+                                                       Root MSE      =  266.15
+
+------------------------------------------------------------------------------
+             |               Robust
+        area |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+notinbasel~e |    275.194   2.811622    97.88   0.000     269.6826    280.7054
+       arm_c |   413.1064   49.61751     8.33   0.000     315.8447     510.368
+    arm_free |   476.4255   49.20339     9.68   0.000     379.9757    572.8754
+      arm_mf |   417.4043   56.03913     7.45   0.000     307.5548    527.2537
+------------------------------------------------------------------------------
+
+. matrix results = _b[notinbaseline],_b[arm_c],_b[arm_free],_b[arm_mf],e(N);
+
+. test arm_mf = arm_free = arm_c;
+
+ ( 1)  - arm_free + arm_mf = 0
+ ( 2)  - arm_c + arm_mf = 0
+
+       F(  2,  8987) =    0.50
+            Prob > F =    0.6077
+
+. local equalarms = r(p);
+
+. reg area arm_c arm_free arm_mf, robust;
+
+Linear regression                                      Number of obs =    8991
+                                                       F(  3,  8987) =   10.21
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.0058
+                                                       Root MSE      =  266.15
+
+------------------------------------------------------------------------------
+             |               Robust
+        area |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       arm_c |   137.9124   49.69711     2.78   0.006      40.4947      235.33
+    arm_free |   201.2315   49.28366     4.08   0.000     104.6243    297.8387
+      arm_mf |   142.2102   56.10962     2.53   0.011     32.22261    252.1979
+       _cons |    275.194   2.811622    97.88   0.000     269.6826    280.7054
+------------------------------------------------------------------------------
+
+. test arm_mf arm_free arm_c;
+
+ ( 1)  arm_mf = 0
+ ( 2)  arm_free = 0
+ ( 3)  arm_c = 0
+
+       F(  3,  8987) =   10.21
+            Prob > F =    0.0000
+
+. mat rownames results = area;
+
+. matrix results = results,r(p),`equalarms';
+
+. qui foreach var of varlist 
+>         t_hh sharesc sharest sharef sc_primary sc_middle sc_secondary hospital ph_cntr phs_cnt 
+>         well tank river canal post_off phone bs_fac comm_bank ac_soc app_pr dist_town power_dom power_agr shareirr shareunirr   {;
+
+.         * This displays the results, compare to Table A.7 in the Appendix;
+. mat list results, format(%8.3f);
+
+results[26,7]
+                    c1        c2        c3        c4        c5        c6        c7
+        area   275.194   413.106   476.426   417.404  8991.000     0.000     0.608
+        t_hh   121.535   261.362   359.000   284.277  8991.000     0.000     0.526
+     sharesc     0.134     0.164     0.164     0.173  8630.000     0.012     0.921
+     sharest     0.478     0.328     0.372     0.321  8630.000     0.000     0.597
+      sharef     0.501     0.497     0.496     0.499  8630.000     0.128     0.763
+  sc_primary     0.746     0.936     0.979     0.936  8991.000     0.000     0.432
+   sc_middle     0.236     0.383     0.596     0.447  8991.000     0.000     0.096
+sc_secondary     0.129     0.319     0.404     0.298  8991.000     0.000     0.523
+    hospital     0.002     0.000     0.021     0.000  8991.000     0.001     0.312
+     ph_cntr     0.025     0.106     0.064     0.064  8991.000     0.132     0.711
+     phs_cnt     0.105     0.170     0.234     0.213  8991.000     0.029     0.727
+        well     0.815     0.830     0.872     0.809  8991.000     0.692     0.678
+        tank     0.557     0.702     0.723     0.745  8991.000     0.000     0.899
+       river     0.120     0.106     0.170     0.149  8991.000     0.747     0.643
+       canal     0.050     0.128     0.149     0.128  8991.000     0.034     0.943
+    post_off     0.158     0.234     0.383     0.255  8991.000     0.003     0.246
+       phone     0.285     0.532     0.617     0.553  8991.000     0.000     0.682
+      bs_fac     0.228     0.255     0.298     0.298  8991.000     0.499     0.866
+   comm_bank     0.027     0.064     0.064     0.085  8991.000     0.242     0.906
+      ac_soc     0.027     0.085     0.106     0.106  8991.000     0.043     0.919
+      app_pr     0.332     0.383     0.426     0.362  8991.000     0.506     0.813
+   dist_town    34.913    34.298    25.191    26.106  8991.000     0.000     0.444
+   power_dom     0.465     0.702     0.574     0.681  8991.000     0.000     0.389
+   power_agr     0.066     0.106     0.064     0.149  8991.000     0.346     0.386
+    shareirr     0.075     0.151     0.188     0.183  8875.000     0.000     0.727
+  shareunirr     0.422     0.504     0.483     0.510  8875.000     0.005     0.864
+
+. cap log close;

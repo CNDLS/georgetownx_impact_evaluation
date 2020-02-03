@@ -1,0 +1,386 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\Figure A5 Malaria Prevalence vs Intensity of ITNs Distribution.lo
+> g
+  log type:  text
+ opened on:  12 Oct 2013, 13:05:55
+
+. use "panel_biomarkers";
+
+. merge m:1 id_v using "villagedistribution";
+(label district already defined)
+(label treatment already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                            18,569  (_merge==3)
+    -----------------------------------------
+
+. gen ratio = bmem/t_p;
+
+. gen pcnets = vnets_deliv/t_p;
+
+. * Keep only panel households;
+. keep if match==1;
+(7971 observations deleted)
+
+. gen both = 1 if m1<. & m0<.;
+(8701 missing values generated)
+
+. gen mboth = m1==1 & m0==1 if both<.;
+(8701 missing values generated)
+
+. collapse arm_mf arm_free vtype id_dist v_pcnets pcnets ratio m1 m0 mboth
+>         (count) n_both=both n_m1=m1 n_m0=m0, by(id_v);
+
+.         label var m1 "Village-level prevalence, follow-up";
+
+. label var n_m1 "Number of malaria tests at follow-up";
+
+. label var m0 "Village-level prevalence, baseline";
+
+. label var n_m0 "Number of malaria tests at baseline";
+
+. label var n_both "Number of individuals tested at both baseline and followup";
+
+. label var mboth "Had malaria both at baseline and at follow up";
+
+. label var v_pcnets "(# program ITNs)/(Village pop.)";
+
+. label var ratio "# BISWA members/total population";
+
+. label var pcnets "ITNs delivered / village population";
+
+. gen sigma = m0*(1-m0)/n_m0 + m1*(1-m1)/n_m1 - 2*(n_both/(n_m0*n_m1))*(mboth - m0*m1);
+
+. list n* m* if sigma==0;
+
+     +----------------------------------------+
+     | n_both   n_m1   n_m0   m1   m0   mboth |
+     |----------------------------------------|
+ 32. |      4     12      5    0    0       0 |
+ 35. |     17     65     20    0    0       0 |
+ 49. |      9     26     13    0    0       0 |
+126. |      5     16      5    0    0       0 |
+     +----------------------------------------+
+
+. gen oneoversigma = 1/sigma;
+(4 missing values generated)
+
+. range grid 0 .3 100;
+(41 missing values generated)
+
+. * Calculate a weight for the change in malaria prevalence. Here I calculate it as the geometric mean of the numbers of tests in basel
+> ine and follow-up;
+. gen weight = sqrt(n_m1*n_m0);
+
+. label var grid "# BISWA members / village population";
+
+. gen dm = m1 - m0;
+
+. label var dm "Change";
+
+. **** LOOK AT CHANGES IN MALARIA PREVALENCE AT THE VILLAGE LEVEL VS. NUMBER OF NETS DISTRIBUTED;
+. * Generate the arm-specific graphs grouped into Figure A.5 and estimate the regressions in the graphs, whose main coefficients
+> * of interest are reported in the caption to the figure;
+. *** FREE;
+. reg dm v_pcnets [aw=weight] if vtype==2, robust;
+(sum of wgt is   1.4790e+03)
+
+Linear regression                                      Number of obs =      47
+                                                       F(  1,    45) =   11.65
+                                                       Prob > F      =  0.0014
+                                                       R-squared     =  0.1664
+                                                       Root MSE      =  .14828
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    v_pcnets |   .5878516   .1722306     3.41   0.001     .2409614    .9347418
+       _cons |   .0436139   .0301173     1.45   0.155    -.0170453    .1042732
+------------------------------------------------------------------------------
+
+. predict d_mhat if vtype==2;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. label var d_mhat "OLS";
+
+. reg dm v_pcnets [aw=weight] if vtype==2 & v_pcnets<.35, robust;
+(sum of wgt is   1.3630e+03)
+
+Linear regression                                      Number of obs =      44
+                                                       F(  1,    42) =    0.00
+                                                       Prob > F      =  0.9662
+                                                       R-squared     =  0.0001
+                                                       Root MSE      =  .14459
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    v_pcnets |  -.0157039    .368554    -0.04   0.966     -.759476    .7280683
+       _cons |   .0879737   .0375317     2.34   0.024     .0122317    .1637157
+------------------------------------------------------------------------------
+
+. predict temp if vtype==2;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. sum v_pcnets if vtype==2;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+    v_pcnets |        47    .1066518    .1062642   .0060006   .4690027
+
+. gen d_mhat2 = temp if vtype==2 & v_pcnets==r(min) | v_pcnets==r(max);
+(139 missing values generated)
+
+. label var d_mhat2 "OLS, no outliers";
+
+. twoway (scatter dm v_pcnets, mcolor(black) msymbol(circle) mfcolor(none)) 
+>         (connected d_mhat v_pcnets, msymbol(none) lwidth(medium) lpattern(solid)) 
+>         (connected d_mhat2 v_pcnets, mcolor(black) msize(small) msymbol(none) lwidth(vthin) lpattern(dash)) if vtype==2,  
+>         title("(A) Change in Malaria prevalence (Free)", position(11) justification(left))
+>         legend(rows(1) region(lcolor(none))) ylabel(-.4(.2).8, angle(horizontal)) saving(g1, replace);
+(note: file g1.gph not found)
+(file g1.gph saved)
+
+. drop temp d_mhat d_mhat2;
+
+. *** MF;
+. reg dm v_pcnets [aw=weight] if vtype==3, robust;
+(sum of wgt is   1.3270e+03)
+
+Linear regression                                      Number of obs =      47
+                                                       F(  1,    45) =    2.77
+                                                       Prob > F      =  0.1033
+                                                       R-squared     =  0.0491
+                                                       Root MSE      =  .14864
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    v_pcnets |  -.5385141   .3238282    -1.66   0.103    -1.190738    .1137093
+       _cons |   .1325469   .0250276     5.30   0.000     .0821387     .182955
+------------------------------------------------------------------------------
+
+. predict d_mhat if vtype==3;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. label var d_mhat "OLS";
+
+. reg dm v_pcnets [aw=weight] if vtype==3 & v_pcnets<.35, robust;
+(sum of wgt is   1.3086e+03)
+
+Linear regression                                      Number of obs =      46
+                                                       F(  1,    44) =    1.80
+                                                       Prob > F      =  0.1865
+                                                       R-squared     =  0.0488
+                                                       Root MSE      =   .1492
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    v_pcnets |   -.721927    .537988    -1.34   0.187    -1.806171    .3623166
+       _cons |    .138274   .0277745     4.98   0.000     .0822981    .1942499
+------------------------------------------------------------------------------
+
+. predict temp if vtype==3;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. sum v_pcnets if vtype==3;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+    v_pcnets |        47    .0453251     .069215          0   .3900415
+
+. gen d_mhat2 = temp if vtype==3 & v_pcnets==r(min) | v_pcnets==r(max);
+(135 missing values generated)
+
+. label var d_mhat2 "OLS, no outliers";
+
+. twoway (scatter dm v_pcnets, mcolor(black) msymbol(circle) mfcolor(none)) 
+>         (connected d_mhat v_pcnets, msymbol(none) lwidth(medium) lpattern(solid)) 
+>         (connected d_mhat2 v_pcnets, mcolor(black) msize(small) msymbol(none) lwidth(vthin) lpattern(dash)) if vtype==3,  
+>         title("(B) Change in Malaria prevalence (MF)", position(11) justification(left))
+>         legend(rows(1) region(lcolor(none))) ylabel(-.4(.2).8, angle(horizontal)) saving(g2, replace);
+(note: file g2.gph not found)
+(file g2.gph saved)
+
+. drop temp d_mhat d_mhat2;
+
+. *** CONTROL (in this case use "ratio", not v_pcnets, because no ITNs were distributed;
+. reg dm ratio [aw=weight] if vtype==1, robust;
+(sum of wgt is   1.3506e+03)
+
+Linear regression                                      Number of obs =      47
+                                                       F(  1,    45) =    3.20
+                                                       Prob > F      =  0.0805
+                                                       R-squared     =  0.0600
+                                                       Root MSE      =   .1581
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       ratio |  -.7603426   .4251903    -1.79   0.080     -1.61672    .0960346
+       _cons |    .114402   .0367354     3.11   0.003     .0404131    .1883909
+------------------------------------------------------------------------------
+
+. predict d_mhat if vtype==1;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. label var d_mhat "OLS";
+
+. reg dm ratio [aw=weight] if vtype==1 & ratio<.20, robust;
+(sum of wgt is   1.3133e+03)
+
+Linear regression                                      Number of obs =      46
+                                                       F(  1,    44) =    0.35
+                                                       Prob > F      =  0.5576
+                                                       R-squared     =  0.0065
+                                                       Root MSE      =  .15779
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       ratio |  -.3110191   .5263303    -0.59   0.558    -1.371768    .7497299
+       _cons |   .0957903   .0397327     2.41   0.020     .0157142    .1758663
+------------------------------------------------------------------------------
+
+. predict temp if vtype==1;
+(option xb assumed; fitted values)
+(94 missing values generated)
+
+. sum ratio if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+       ratio |        47    .0496609    .0494167   .0046598        .25
+
+. gen d_mhat2 = temp if vtype==1 & ratio==r(min) | ratio==r(max);
+(139 missing values generated)
+
+. label var d_mhat2 "OLS, no outliers";
+
+. twoway (scatter dm ratio, mcolor(black) msymbol(circle) mfcolor(none)) 
+>         (connected d_mhat ratio, msymbol(none) lwidth(medium) lpattern(solid)) 
+>         (connected d_mhat2 ratio, mcolor(black) msize(small) msymbol(none) lwidth(vthin) lpattern(dash)) if vtype==1,  
+>         title("(C) Change in Malaria prevalence (Controls)", position(11) justification(left))
+>         legend(rows(1) region(lcolor(none))) ylabel(-.4(.2).8, angle(horizontal)) saving(g3, replace);
+(note: file g3.gph not found)
+(file g3.gph saved)
+
+. graph combine g1.gph g2.gph g3.gph, iscale(.55);
+
+. xi: reg dm i.arm_free*ratio if v_pcnets<.35 & vtype<3, robust;
+i.arm_free        _Iarm_free_0-1      (naturally coded; _Iarm_free_0 omitted)
+i.arm_f~e*ratio   _IarmXratio_#       (coded as above)
+
+Linear regression                                      Number of obs =      91
+                                                       F(  3,    87) =    1.12
+                                                       Prob > F      =  0.3455
+                                                       R-squared     =  0.0348
+                                                       Root MSE      =  .15139
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+_Iarm_free_1 |  -.0094817    .047006    -0.20   0.841    -.1029112    .0839478
+       ratio |  -.6639944    .430998    -1.54   0.127     -1.52065    .1926608
+_IarmXrati~1 |  -.0064141   .8384575    -0.01   0.994    -1.672939    1.660111
+       _cons |   .1109315   .0352382     3.15   0.002     .0408919    .1809712
+------------------------------------------------------------------------------
+
+. xi: reg dm i.arm_free*ratio if v_pcnets<.35 & vtype<3 [aw=weight], robust;
+i.arm_free        _Iarm_free_0-1      (naturally coded; _Iarm_free_0 omitted)
+i.arm_f~e*ratio   _IarmXratio_#       (coded as above)
+(sum of wgt is   2.7135e+03)
+
+Linear regression                                      Number of obs =      91
+                                                       F(  3,    87) =    1.42
+                                                       Prob > F      =  0.2410
+                                                       R-squared     =  0.0423
+                                                       Root MSE      =  .15094
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+_Iarm_free_1 |  -.0080239     .05026    -0.16   0.874    -.1079211    .0918734
+       ratio |  -.7603426   .4255021    -1.79   0.077    -1.606074    .0853889
+_IarmXrati~1 |   .2482617   .8472377     0.29   0.770    -1.435715    1.932238
+       _cons |    .114402   .0367624     3.11   0.003     .0413328    .1874711
+------------------------------------------------------------------------------
+
+. xi: reg dm i.arm_free*ratio if vtype<3 [aw=weight], robust;
+i.arm_free        _Iarm_free_0-1      (naturally coded; _Iarm_free_0 omitted)
+i.arm_f~e*ratio   _IarmXratio_#       (coded as above)
+(sum of wgt is   2.8296e+03)
+
+Linear regression                                      Number of obs =      94
+                                                       F(  3,    90) =    2.85
+                                                       Prob > F      =  0.0418
+                                                       R-squared     =  0.0935
+                                                       Root MSE      =  .15601
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+_Iarm_free_1 |  -.0546056   .0482995    -1.13   0.261     -.150561    .0413498
+       ratio |  -.7603426   .4251903    -1.79   0.077    -1.605057    .0843721
+_IarmXrati~1 |   1.789292   .6727203     2.66   0.009     .4528158    3.125768
+       _cons |    .114402   .0367354     3.11   0.002     .0414207    .1873833
+------------------------------------------------------------------------------
+
+. xi: reg dm i.arm_free*ratio if v_pcnets<.35 & vtype<3 [aw=oneoversigma], robust;
+i.arm_free        _Iarm_free_0-1      (naturally coded; _Iarm_free_0 omitted)
+i.arm_f~e*ratio   _IarmXratio_#       (coded as above)
+(sum of wgt is   2.5751e+04)
+
+Linear regression                                      Number of obs =      89
+                                                       F(  3,    85) =    3.24
+                                                       Prob > F      =  0.0259
+                                                       R-squared     =  0.0802
+                                                       Root MSE      =  .10936
+
+------------------------------------------------------------------------------
+             |               Robust
+          dm |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+_Iarm_free_1 |   .0167728    .036666     0.46   0.649     -.056129    .0896746
+       ratio |  -.7365619   .3297467    -2.23   0.028    -1.392187   -.0809371
+_IarmXrati~1 |   .2027711   .4466921     0.45   0.651    -.6853725    1.090915
+       _cons |   .1008076   .0252752     3.99   0.000     .0505537    .1510615
+------------------------------------------------------------------------------
+
+. list ratio v_pcnets vtype if ratio>.18 | v_pcnets>.35;
+
+     +-----------------------------+
+     |    ratio   v_pcnets   vtype |
+     |-----------------------------|
+  5. | .1372549   .3529412       2 |
+  6. | .1948052   .4242424       2 |
+ 16. | .1832884   .4690027       2 |
+ 27. |      .25          0       1 |
+ 49. | .0456432   .3900415       3 |
+     +-----------------------------+
+
+.  erase g1.gph;
+
+. erase g2.gph;
+
+. erase g3.gph;
+
+. cap log close;

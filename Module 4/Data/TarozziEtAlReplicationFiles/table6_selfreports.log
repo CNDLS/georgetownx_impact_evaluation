@@ -1,0 +1,319 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table6_selfreports.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:25
+
+. ** THIS FILE GENERATES THE RESULTS IN TABLE 5 OF THE PAPER;
+. * As usual use only information from panel households present both at baseline and at follow-up (that is, match==1);
+. use "panel_biomarkers" if match==1;
+
+. * COLUMN 1, MALARIA IN THE SAME MONTH AS THE INTERVIEW;
+. gen diff = survey_m_now1 - survey_m_now0;
+(1914 missing values generated)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    8684
+                                                       F(  2,   140) =    0.50
+                                                       Prob > F      =  0.6065
+                                                       R-squared     =  0.0002
+                                                       Root MSE      =  .13096
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0041746   .0041703    -1.00   0.319    -.0124196    .0040703
+      arm_mf |  -.0017738   .0042526    -0.42   0.677    -.0101815    .0066339
+       _cons |  -.0010661   .0028286    -0.38   0.707    -.0066583    .0045261
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.50
+            Prob > F =    0.6065
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.30
+            Prob > F =    0.5873
+
+. sum survey_m_now1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+survey_m_n~1 |      3088    .0074482    .0859948          0          1
+
+. * COLUMN 2, TOTAL NUMBER OF MALARIA EPISODES LAST 6 MONTHS;
+. replace diff = survey_m61 - survey_m60;
+(1387 real changes made)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    8684
+                                                       F(  2,   140) =    4.91
+                                                       Prob > F      =  0.0087
+                                                       R-squared     =  0.0026
+                                                       Root MSE      =   .4515
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0477761   .0183769    -2.60   0.010    -.0841082   -.0114439
+      arm_mf |  -.0511443   .0182515    -2.80   0.006    -.0872284   -.0150602
+       _cons |   .0245203   .0128254     1.91   0.058    -.0008362    .0498767
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    4.91
+            Prob > F =    0.0087
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.03
+            Prob > F =    0.8557
+
+. sum survey_m61 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+  survey_m61 |      3088    .1146373     .362396          0          4
+
+. * The following results use information at the household level. First generate the aggregates;
+. collapse arm_free arm_mf vtype (sum) cost_m_days* cost_m_expit* cost_m_expdd* cost_m_debt* cost_m_less*, by(id_v id_hhno);
+
+. * COLUMN 3, NUMBER OF DAYS OF SCHOOL/WORK LOST IN HOUSEHOLD;
+. gen diff = cost_m_days1 - cost_m_days0;
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1768
+                                                       F(  2,   140) =    2.49
+                                                       Prob > F      =  0.0862
+                                                       R-squared     =  0.0034
+                                                       Root MSE      =  17.636
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   -1.94421   1.187456    -1.64   0.104    -4.291874    .4034534
+      arm_mf |  -2.394276   1.130255    -2.12   0.036    -4.628851   -.1597005
+       _cons |   1.511424   .8022578     1.88   0.062    -.0746833     3.09753
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    2.49
+            Prob > F =    0.0862
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.14
+            Prob > F =    0.7043
+
+. sum cost_m_days1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+cost_m_days1 |       569    5.778559    15.55952          0        165
+
+. * COLUMN 4, TOTAL EXPENDITURES;
+. replace diff = cost_m_expit1 - cost_m_expit0;
+(972 real changes made)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1768
+                                                       F(  2,   140) =    1.79
+                                                       Prob > F      =  0.1713
+                                                       R-squared     =  0.0017
+                                                       Root MSE      =  2761.4
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -194.0191   180.1014    -1.08   0.283    -550.0891     162.051
+      arm_mf |  -269.2824   143.4297    -1.88   0.063    -552.8507    14.28588
+       _cons |   238.1717   110.1585     2.16   0.032     20.38231    455.9611
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.79
+            Prob > F =    0.1713
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.20
+            Prob > F =    0.6578
+
+. sum cost_m_expit1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+cost_m_ex~t1 |       569    862.7926    2152.041          0      22800
+
+. * COLUMN 5, EXPENDITURES FOR DRUGS/DOCTORS;
+. replace diff = cost_m_expdd1 - cost_m_expdd0;
+(867 real changes made)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1768
+                                                       F(  2,   140) =    3.00
+                                                       Prob > F      =  0.0530
+                                                       R-squared     =  0.0021
+                                                       Root MSE      =  1644.1
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -85.96011   100.0976    -0.86   0.392    -283.8584    111.9382
+      arm_mf |  -187.2446   76.50843    -2.45   0.016    -338.5059   -35.98331
+       _cons |   168.8084   54.64542     3.09   0.002     60.77145    276.8453
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    3.00
+            Prob > F =    0.0530
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    1.04
+            Prob > F =    0.3105
+
+. sum cost_m_expdd1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+cost_m_ex~d1 |       569    486.7926    1178.853          0      12400
+
+. * COLUMN 6, # EPISODES PAID WITH DEBT;
+. replace diff = cost_m_debt1 - cost_m_debt0;
+(948 real changes made)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1768
+                                                       F(  2,   140) =    3.51
+                                                       Prob > F      =  0.0326
+                                                       R-squared     =  0.0047
+                                                       Root MSE      =  .76724
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.1144429   .0511663    -2.24   0.027    -.2156016   -.0132843
+      arm_mf |  -.1109861   .0464124    -2.39   0.018    -.2027459   -.0192264
+       _cons |   .0685413   .0355418     1.93   0.056    -.0017268    .1388094
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    3.51
+            Prob > F =    0.0326
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.01
+            Prob > F =    0.9420
+
+. sum cost_m_debt1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+cost_m_debt1 |       569    .2196837    .6245273          0          6
+
+. * COLUMN 7, # EPISODES PAID WITH REDUCTED CONSUMPTION;
+. replace diff = cost_m_less1 - cost_m_less0;
+(676 real changes made)
+
+. reg diff arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1768
+                                                       F(  2,   140) =    2.61
+                                                       Prob > F      =  0.0770
+                                                       R-squared     =  0.0043
+                                                       Root MSE      =  .74465
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+        diff |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.1160564   .0559196    -2.08   0.040    -.2266125   -.0055002
+      arm_mf |   -.087411   .0513837    -1.70   0.091    -.1889994    .0141774
+       _cons |  -.1757469    .033747    -5.21   0.000    -.2424665   -.1090274
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    2.61
+            Prob > F =    0.0770
+
+. test arm_free = arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+       F(  1,   140) =    0.24
+            Prob > F =    0.6285
+
+. sum cost_m_less1 if vtype==1;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+cost_m_less1 |       569    .0685413     .346834          0          4
+
+. log close;
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table6_selfreports.log
+  log type:  text
+ closed on:  12 Oct 2013, 13:06:26
+---------------------------------------------------------------------------------------------------------------------------------------

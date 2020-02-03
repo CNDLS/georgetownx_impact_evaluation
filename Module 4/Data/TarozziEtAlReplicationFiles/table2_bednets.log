@@ -1,0 +1,387 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table2_bednets.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:09
+
+. * HOUSEHOLD-LEVEL BASELINE INFORMATION;
+. use "hhinfo_bl";
+(Sample frame: All BISWA Census villages with no GOI now or planned for 2007 SRS)
+
+. * Column 1;
+.  reg totnet_ic mf free if match==1, clu(id_v) nocon;
+
+Linear regression                                      Number of obs =    1199
+                                                       F(  2,    93) =  684.07
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.5519
+                                                       Root MSE      =  1.8665
+
+                                  (Std. Err. adjusted for 94 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+   totnet_ic |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+          mf |   1.193548   .2080559     5.74   0.000     .7803907    1.606706
+        free |   2.654098   .0726337    36.54   0.000     2.509862    2.798334
+------------------------------------------------------------------------------
+
+. lincom free - mf;
+
+ ( 1)  - mf + free = 0
+
+------------------------------------------------------------------------------
+   totnet_ic |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |    1.46055   .2203699     6.63   0.000     1.022939    1.898161
+------------------------------------------------------------------------------
+
+. test free mf;
+
+ ( 1)  free = 0
+ ( 2)  mf = 0
+
+       F(  2,    93) =  684.07
+            Prob > F =    0.0000
+
+. * Column 2;
+.  reg somenets_ic free mf if match==1, clu(id_v) nocon;
+
+Linear regression                                      Number of obs =    1199
+                                                       F(  2,    93) = 1143.04
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.8089
+                                                       Root MSE      =  .37782
+
+                                  (Std. Err. adjusted for 94 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+ somenets_ic |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |   .9590164   .0206748    46.39   0.000     .9179604    1.000072
+          mf |    .524618    .045245    11.60   0.000     .4347704    .6144656
+------------------------------------------------------------------------------
+
+. lincom free-mf;
+
+ ( 1)  free - mf = 0
+
+------------------------------------------------------------------------------
+ somenets_ic |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .4343984   .0497449     8.73   0.000     .3356148    .5331819
+------------------------------------------------------------------------------
+
+. test free mf;
+
+ ( 1)  free = 0
+ ( 2)  mf = 0
+
+       F(  2,    93) = 1143.04
+            Prob > F =    0.0000
+
+. * Column 3 (DD, so need to merge with follow-up data);
+. merge 1:1 id_v id_hhno using "hhinfo_fup";
+id_hhno was int now long
+(label treatment already defined)
+(label district already defined)
+(label match already defined)
+(label yesno already defined)
+(label negatives already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            69
+        from master                        69  (_merge==1)
+        from using                          0  (_merge==2)
+
+    matched                             1,775  (_merge==3)
+    -----------------------------------------
+
+. keep if match==1 & _merge==3;
+(76 observations deleted)
+
+. gen dnets = totnets - nets_bl;
+(9 missing values generated)
+
+. sum nets_bl;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+     nets_bl |      1760    1.579545    1.748038          0         20
+
+. reg dnets free mf, clu(id_v);
+
+Linear regression                                      Number of obs =    1759
+                                                       F(  2,   140) =  102.79
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.1215
+                                                       Root MSE      =  1.7449
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+       dnets |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |   1.562788   .1093621    14.29   0.000     1.346574    1.779003
+          mf |   .5688629   .1064659     5.34   0.000     .3583741    .7793516
+       _cons |   .3044248    .072179     4.22   0.000     .1617229    .4471266
+------------------------------------------------------------------------------
+
+. test free mf;
+
+ ( 1)  free = 0
+ ( 2)  mf = 0
+
+       F(  2,   140) =  102.79
+            Prob > F =    0.0000
+
+. lincom free-mf;
+
+ ( 1)  free - mf = 0
+
+------------------------------------------------------------------------------
+       dnets |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .9939254   .1134699     8.76   0.000     .7695894    1.218261
+------------------------------------------------------------------------------
+
+. * Columns 4-7 were estimated using individual-level data;
+. use "panel_biomarkers" if match==1, clear;
+
+. gen d_net = netlast_fup -  netlast_bl;
+(2891 missing values generated)
+
+. gen d_itn = itnlast_fup -  itnlast_bl;
+(2951 missing values generated)
+
+. * Column 4;
+. reg d_net arm_free arm_mf, clu(id_v);
+
+Linear regression                                      Number of obs =    7707
+                                                       F(  2,   140) =   56.17
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.0907
+                                                       Root MSE      =  .51728
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+       d_net |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .3784063    .035742    10.59   0.000     .3077425    .4490701
+      arm_mf |   .0904457   .0337462     2.68   0.008     .0237276    .1571639
+       _cons |   .0500601   .0189631     2.64   0.009     .0125689    .0875512
+------------------------------------------------------------------------------
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+       d_net |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .2879605   .0411958     6.99   0.000     .2065142    .3694069
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =   56.17
+            Prob > F =    0.0000
+
+. * Column 5;
+. reg d_itn arm_free arm_mf, clu(id_v);
+
+Linear regression                                      Number of obs =    7647
+                                                       F(  2,   140) =  118.32
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.1986
+                                                       Root MSE      =  .39427
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+       d_itn |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |    .459593   .0308984    14.87   0.000     .3985053    .5206808
+      arm_mf |   .1262692   .0264774     4.77   0.000      .073922    .1786165
+       _cons |   .0028283   .0068445     0.41   0.680    -.0107037    .0163603
+------------------------------------------------------------------------------
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+       d_itn |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .3333238    .039523     8.43   0.000     .2551847    .4114629
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =  118.32
+            Prob > F =    0.0000
+
+. * Column 6;
+. gen d_u = (netlast_fup-itnlast_fup) - (netlast_bl-itnlast_bl);
+(2951 missing values generated)
+
+. reg d_u arm_free arm_mf, clu(id_v);
+
+Linear regression                                      Number of obs =    7647
+                                                       F(  2,   140) =    5.29
+                                                       Prob > F      =  0.0061
+                                                       R-squared     =  0.0070
+                                                       Root MSE      =  .41308
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+         d_u |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0840949    .025874    -3.25   0.001    -.1352491   -.0329406
+      arm_mf |  -.0371521   .0263859    -1.41   0.161    -.0893184    .0150142
+       _cons |   .0492929   .0164285     3.00   0.003     .0168129     .081773
+------------------------------------------------------------------------------
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+         d_u |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0469428   .0287382    -1.63   0.105    -.1037598    .0098743
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    5.29
+            Prob > F =    0.0061
+
+. * Column 7;
+. reg net_biswa1 arm_free arm_mf, clu(id_v);
+
+Linear regression                                      Number of obs =    8046
+                                                       F(  2,   140) =  143.36
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.2401
+                                                       Root MSE      =  .35654
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+  net_biswa1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |   .4709667   .0296878    15.86   0.000     .4122722    .5296611
+      arm_mf |   .1329604   .0221142     6.01   0.000     .0892394    .1766815
+       _cons |   .0023292   .0019479     1.20   0.234    -.0015218    .0061802
+------------------------------------------------------------------------------
+
+. lincom arm_free - arm_mf;
+
+ ( 1)  arm_free - arm_mf = 0
+
+------------------------------------------------------------------------------
+  net_biswa1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .3380062   .0369164     9.16   0.000     .2650205    .4109919
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =  143.36
+            Prob > F =    0.0000
+
+.  * Column 8;
+. * This is again a regression run at the household level;
+. use "hhinfo_bl", clear;
+(Sample frame: All BISWA Census villages with no GOI now or planned for 2007 SRS)
+
+. merge 1:1 id_v id_hhno using "hhinfo_fup";
+id_hhno was int now long
+(label treatment already defined)
+(label district already defined)
+(label match already defined)
+(label yesno already defined)
+(label negatives already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            69
+        from master                        69  (_merge==1)
+        from using                          0  (_merge==2)
+
+    matched                             1,775  (_merge==3)
+    -----------------------------------------
+
+. * Keep only observations from MF & Free, where at least one net was delivered;
+. keep if _merge==3 & totnet_ic>0 & totnet_ic<. & (vtype==2 | vtype==3) & match==1;
+(950 observations deleted)
+
+. gen ratio = usnets_sb/totnet_ic;
+(3 missing values generated)
+
+. sum ratio;
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+       ratio |       891    .4091711    .4412368          0          3
+
+. count if ratio>1;
+   10
+
+. * In a handful of cases, the ratio between biswa nets used and delivered is larger than one. I set the ratio =1 although not doing so
+> * would leave the results virtually identical;
+. replace ratio = 1 if ratio>1;
+(10 real changes made)
+
+. reg ratio free mf, clu(id_v) nocons;
+
+Linear regression                                      Number of obs =     894
+                                                       F(  2,    88) =  278.99
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.5035
+                                                       Root MSE      =  .40413
+
+                                  (Std. Err. adjusted for 89 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+       ratio |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |    .448547   .0213761    20.98   0.000     .4060665    .4910275
+          mf |   .3117739   .0287407    10.85   0.000     .2546577      .36889
+------------------------------------------------------------------------------
+
+. test free mf;
+
+ ( 1)  free = 0
+ ( 2)  mf = 0
+
+       F(  2,    88) =  278.99
+            Prob > F =    0.0000
+
+. lincom free-mf;
+
+ ( 1)  free - mf = 0
+
+------------------------------------------------------------------------------
+       ratio |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .1367731   .0358185     3.82   0.000     .0655913    .2079549
+------------------------------------------------------------------------------
+
+. cap log close;

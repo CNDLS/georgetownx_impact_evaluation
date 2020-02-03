@@ -1,0 +1,134 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\Figure A3 Impacts on Biomarkers by demographic group.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:05:43
+
+. use "panel_biomarkers";
+
+. gen an1 = hb1<11 if hb1<.;
+(8348 missing values generated)
+
+. gen an0 = hb0<11 if hb0<.;
+(16037 missing values generated)
+
+. drop agegroup;
+
+. recode age1 (0/4=1 "Age<5") (5/14=2 "5<=Age<15") (15/59=3 "15<=Age<60") (50/130=4 "Age>=50"), generate(agegroup) label(agegroup);
+(16897 differences between age1 and agegroup)
+
+. * Keep only observations from panel households;
+. keep if match==1;
+(7971 observations deleted)
+
+. drop if agegroup==. | female==. | vtype==4;
+(1034 observations deleted)
+
+. * Estimate and store results using only follow-up;
+. mat results = J(4*2*3,13,.);
+
+. mat colnames results = agegroup female vtype an1 an1_se an1_u an1_l an1_n m1 m1_se m1_u m1_l m1_n;
+
+. local line = 1;
+
+. forvalues agegroup = 1/4 {;
+  2.         forvalues gender = 0/1 {;
+  3.                 forvalues arm = 1/3 {;
+  4.                                 qui reg an1 if agegroup==`agegroup' & female==`gender' & vtype==`arm', cluster(id_v);
+  5.                 matrix temp = [`agegroup',`gender',`arm',_b[_cons],_se[_cons],_b[_cons]+1.96*_se[_cons],_b[_cons]-1.96*_se[_cons],
+> e(N)];
+  6.                 qui reg m1 if agegroup==`agegroup' & female==`gender' & vtype==`arm', cluster(id_v);
+  7.                 matrix temp = temp,[_b[_cons],_se[_cons],_b[_cons]+1.96*_se[_cons],_b[_cons]-1.96*_se[_cons],e(N)];
+  8.                 matrix results[`line',1]=temp;
+  9.                 local line = `line'+1;
+ 10.                 };
+ 11.                 };
+ 12.  };
+
+. mat list results, format(%5.3g);
+
+results[24,13]
+     agegroup    female     vtype       an1    an1_se     an1_u     an1_l     an1_n        m1     m1_se      m1_u      m1_l      m1_n
+ r1         1         0         1      .674      .047      .765      .582        92      .109      .033      .174      .044        92
+ r2         1         0         2      .699      .044      .785      .613       136      .184      .045      .272      .096       136
+ r3         1         0         3      .716      .042      .797      .634       116      .198      .045      .287      .109       116
+ r4         1         1         1      .686      .055      .794      .578       102      .167      .051      .266      .067       102
+ r5         1         1         2       .75      .044      .836      .664       108      .148      .032      .212      .085       108
+ r6         1         1         3      .675      .049      .771      .579       114      .149      .034      .215      .083       114
+ r7         2         0         1      .351      .037      .424      .278       205      .254      .051      .354      .153       205
+ r8         2         0         2      .319      .033      .384      .255       263      .308      .042      .391      .225       263
+ r9         2         0         3      .335      .034      .401      .269       206      .332      .043      .416      .248       205
+r10         2         1         1      .451      .039      .529      .374       237      .201      .036      .271      .131       239
+r11         2         1         2      .421      .035       .49      .351       233      .279      .039      .355      .203       233
+r12         2         1         3      .404      .035      .472      .335       218      .259      .042      .342      .177       216
+r13         3         0         1      .108      .013      .134      .082       649      .151      .019      .187      .115       649
+r14         3         0         2       .13       .02      .168      .091       709       .17       .02       .21       .13       710
+r15         3         0         3      .131      .016      .163        .1       624      .171      .028      .226      .116       620
+r16         3         1         1      .457      .019      .494      .421       774      .208      .026      .259      .157       775
+r17         3         1         2      .475      .025      .523      .426       866      .241      .025      .289      .193       871
+r18         3         1         3      .455      .022      .499      .412       762      .272      .033      .337      .207       762
+r19         4         0         1      .439      .051      .539      .339       123      .163      .032      .225        .1       123
+r20         4         0         2      .475      .051      .574      .375       118      .175      .037      .247      .103       120
+r21         4         0         3      .426      .042      .509      .343       115      .157      .037      .228      .085       115
+r22         4         1         1      .817      .032      .879      .756       115      .167      .045      .254      .079       114
+r23         4         1         2      .706      .043      .791      .622       126      .219      .043      .304      .134       128
+r24         4         1         3      .766      .046      .856      .676       107      .178      .041      .257      .098       107
+
+. drop _all;
+
+. svmat results, n(col);
+number of observations will be reset to 24
+Press any key to continue, or Break to abort
+obs was 0, now 24
+
+. recode vtype (1=1 "C") (3=2 "MF") (2=3 "Free"), gen(newvtype) label(newvtype);
+(16 differences between vtype and newvtype)
+
+. gen newg = newvtype*(agegroup==1) + (newvtype+4)*(agegroup==2) + (newvtype+8)*(agegroup==3) + (newvtype+12)*(agegroup==4);
+
+. label var newg "Age group";
+
+. twoway (bar an1 newg if newvtype==1) (bar an1 newg if newvtype==2) (bar an1 newg if newvtype==3)
+>         (rcap an1_u an1_l newg) if female==0, yline(0(.2).8, lwidth(vthin)) ylabel(0(.2)1)
+>         xlabel(2 "0-4" 6 "5-14" 10 "15-59" 14 ">=60", noticks) legend(row(1) order(1 "C" 2 "MF" 3 "Free") ) scale(1.6)
+>         title("C. Anemia (Hb<11g/dl) Prevalence, Males", position(11)) legend(on position(1) ring(0)) saving(an1_male, replace);
+(note: file an1_male.gph not found)
+(file an1_male.gph saved)
+
+. twoway (bar m1 newg if newvtype==1) (bar m1 newg if newvtype==2) (bar m1 newg if newvtype==3)
+>         (rcap m1_u m1_l newg) if female==0, yline(0(.1).4, lwidth(vthin)) ylabel(0(.1).5)
+>         xlabel(2 "0-4" 6 "5-14" 10 "15-59" 14 ">=60", noticks) legend(row(1) order(1 "C" 2 "MF" 3 "Free") ) scale(1.6)
+>         title("A. Malaria Prevalence, Males", position(11)) legend(on position(1) ring(0)) saving(m1_male, replace);
+(note: file m1_male.gph not found)
+(file m1_male.gph saved)
+
+.         twoway (bar an1 newg if newvtype==1) (bar an1 newg if newvtype==2) (bar an1 newg if newvtype==3)
+>         (rcap an1_u an1_l newg) if female==1, yline(0(.2).8, lwidth(vthin)) ylabel(0(.2)1)
+>         xlabel(2 "0-4" 6 "5-14" 10 "15-59" 14 ">=60", noticks) legend(row(1) order(1 "C" 2 "MF" 3 "Free") ) scale(1.6)
+>         title("D. Anemia (Hb<11g/dl) Prevalence, Females", position(11)) legend(on position(1) ring(0)) saving(an1_female, replace);
+(note: file an1_female.gph not found)
+(file an1_female.gph saved)
+
+.         twoway (bar m1 newg if newvtype==1) (bar m1 newg if newvtype==2) (bar m1 newg if newvtype==3)
+>         (rcap m1_u m1_l newg) if female==1, yline(0(.1).4, lwidth(vthin)) ylabel(0(.1).5)
+>         xlabel(2 "0-4" 6 "5-14" 10 "15-59" 14 ">=60", noticks) legend(row(1) order(1 "C" 2 "MF" 3 "Free") ) scale(1.6)
+>         title("B. Malaria Prevalence, Females", position(11)) legend(on position(1) ring(0)) saving(m1_female, replace);
+(note: file m1_female.gph not found)
+(file m1_female.gph saved)
+
+. graph combine m1_male.gph m1_female.gph an1_male.gph an1_female.gph, iscale(.4);
+
+.  erase an1_male.gph;
+
+. erase an1_female.gph;
+
+. erase m1_male.gph;
+
+. erase m1_female.gph;
+
+. log close;
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\Figure A3 Impacts on Biomarkers by demographic group.log
+  log type:  text
+ closed on:  12 Oct 2013, 13:05:49
+---------------------------------------------------------------------------------------------------------------------------------------

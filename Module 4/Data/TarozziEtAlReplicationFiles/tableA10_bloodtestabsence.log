@@ -1,0 +1,280 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\tableA10_bloodtestabsence.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:45
+
+. *** Generates the estimates in Table A.10: Post-intervention Malaria Biomarkers: Testing Success Rate in Baseline Households;
+. use "panel_biomarkers" if match==1;
+
+. * Generate age/gender categories. Adult (15-45) males will be the omitted category;
+. gen age0_5m = (age1 < 5)*(1-female) if age1<.;
+(1034 missing values generated)
+
+. gen age0_5f = (age1 < 5)*female if age1<.;
+(1034 missing values generated)
+
+. gen age5_15m = (age1>=5 & age1<15)*(1-female) if age1<.;
+(1034 missing values generated)
+
+. gen age5_15f = (age1>=5 & age1<15)*female if age1<.;
+(1034 missing values generated)
+
+. gen age15_45f = (age1>=15 & age1<45)*female if age1<.;
+(1034 missing values generated)
+
+. gen ageO45m = (age1>=45)*(1-female) if age1<.;
+(1034 missing values generated)
+
+. gen ageO45f = (age1>=45)*female if age1<.;
+(1034 missing values generated)
+
+. gen ageU15m = (age1<15)*(1-female) if age1<.;
+(1034 missing values generated)
+
+. gen ageU15f = (age1<15)*(female) if age1<.;
+(1034 missing values generated)
+
+. gen ageO15m = (age1>=15)*(1-female) if age1<.;
+(1034 missing values generated)
+
+. gen ageO15f = (age1>=15)*(female) if age1<.;
+(1034 missing values generated)
+
+. * Check fraction tested at follow-up and differences in age/gender. Consider only members of baseline households listed as members at
+>  follow-up;
+. tab merge_01, missing;
+
+      Result of roster |
+  merging (Sections 1) |      Freq.     Percent        Cum.
+-----------------------+-----------------------------------
+Likely incorrect match |          9        0.08        0.08
+              FUp only |        914        8.62        8.71
+               Bl only |      1,000        9.44       18.14
+                 Match |      8,675       81.86      100.00
+-----------------------+-----------------------------------
+                 Total |     10,598      100.00
+
+. gen refusal = malaria1 == -997 if inlist(merge_01,1,3);
+(1009 missing values generated)
+
+. gen absent = malaria1 == -666 if inlist(merge_01,1,3);
+(1009 missing values generated)
+
+. ******************
+> ***  ABSENCE   ***
+> ******************;
+. * Column 1;
+. reg absent, cluster(id_v);
+
+Linear regression                                      Number of obs =    9589
+                                                       F(  0,   140) =    0.00
+                                                       Prob > F      =       .
+                                                       R-squared     =  0.0000
+                                                       Root MSE      =  .39543
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+      absent |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       _cons |   .1939723   .0073594    26.36   0.000     .1794223    .2085223
+------------------------------------------------------------------------------
+
+. * Column 2;
+. reg absent arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    9589
+                                                       F(  2,   140) =    0.08
+                                                       Prob > F      =  0.9209
+                                                       R-squared     =  0.0001
+                                                       Root MSE      =  .39546
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+      absent |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0014756   .0175507    -0.08   0.933    -.0361742     .033223
+      arm_mf |   .0056009   .0184443     0.30   0.762    -.0308645    .0420662
+       _cons |   .1926695   .0126518    15.23   0.000     .1676562    .2176828
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.08
+            Prob > F =    0.9209
+
+. * Column 3;
+. reg absent arm_free arm_mf age0_5m-ageO45f, cluster(id_v);
+
+Linear regression                                      Number of obs =    9555
+                                                       F(  9,   140) =   21.65
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.0404
+                                                       Root MSE      =  .38791
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+      absent |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0007643   .0179172    -0.04   0.966    -.0361876    .0346589
+      arm_mf |   .0054917   .0186383     0.29   0.769    -.0313572    .0423405
+     age0_5m |  -.2121554   .0200226   -10.60   0.000    -.2517412   -.1725696
+     age0_5f |   -.204693   .0227624    -8.99   0.000    -.2496955   -.1596905
+    age5_15m |  -.1209439   .0184195    -6.57   0.000    -.1573602   -.0845275
+    age5_15f |  -.1362719   .0193194    -7.05   0.000    -.1744674   -.0980764
+   age15_45f |   -.186802   .0152911   -12.22   0.000    -.2170334   -.1565706
+     ageO45m |  -.1329057   .0167799    -7.92   0.000    -.1660804    -.099731
+     ageO45f |  -.2121247    .017675   -12.00   0.000     -.247069   -.1771803
+       _cons |   .3203768   .0181963    17.61   0.000     .2844017    .3563519
+------------------------------------------------------------------------------
+
+. test age0_5m=age0_5f;
+
+ ( 1)  age0_5m - age0_5f = 0
+
+       F(  1,   140) =    0.11
+            Prob > F =    0.7449
+
+. local 0_5 = r(p);
+
+. test age5_15m=age5_15f;
+
+ ( 1)  age5_15m - age5_15f = 0
+
+       F(  1,   140) =    0.60
+            Prob > F =    0.4402
+
+. local 5_15 = r(p);
+
+. test ageO45m=ageO45f;
+
+ ( 1)  ageO45m - ageO45f = 0
+
+       F(  1,   140) =   23.97
+            Prob > F =    0.0000
+
+. local O45 = r(p);
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    0.07
+            Prob > F =    0.9343
+
+. ******************
+> ***  REFUSAL   ***
+> ******************;
+. * Column 4;
+. reg refusal, cluster(id_v);
+
+Linear regression                                      Number of obs =    9589
+                                                       F(  0,   140) =    0.00
+                                                       Prob > F      =       .
+                                                       R-squared     =  0.0000
+                                                       Root MSE      =  .23154
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+     refusal |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       _cons |    .056836   .0063628     8.93   0.000     .0442564    .0694155
+------------------------------------------------------------------------------
+
+. * Column 5;
+. reg refusal arm_free arm_mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    9589
+                                                       F(  2,   140) =    1.48
+                                                       Prob > F      =  0.2303
+                                                       R-squared     =  0.0023
+                                                       Root MSE      =  .23129
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+     refusal |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0089553    .014533    -0.62   0.539    -.0376878    .0197773
+      arm_mf |   .0179012   .0159951     1.12   0.265    -.0137219    .0495243
+       _cons |    .054168   .0105366     5.14   0.000     .0333366    .0749995
+------------------------------------------------------------------------------
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.48
+            Prob > F =    0.2303
+
+. * Column 6;
+. reg refusal arm_free arm_mf age0_5m-ageO45f, cluster(id_v);
+
+Linear regression                                      Number of obs =    9555
+                                                       F(  9,   140) =    2.47
+                                                       Prob > F      =  0.0120
+                                                       R-squared     =  0.0052
+                                                       Root MSE      =  .23103
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+     refusal |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    arm_free |  -.0095021   .0145476    -0.65   0.515    -.0382635    .0192593
+      arm_mf |   .0169009    .015843     1.07   0.288    -.0144216    .0482234
+     age0_5m |   .0174883   .0133803     1.31   0.193    -.0089653     .043942
+     age0_5f |   .0451872   .0170796     2.65   0.009       .01142    .0789545
+    age5_15m |   .0168467   .0101249     1.66   0.098    -.0031708    .0368642
+    age5_15f |   .0076497   .0104798     0.73   0.467    -.0130694    .0283689
+   age15_45f |   .0113481   .0064619     1.76   0.081    -.0014275    .0241236
+     ageO45m |   .0029168   .0064164     0.45   0.650    -.0097687    .0156023
+     ageO45f |    .035854   .0087087     4.12   0.000     .0186363    .0530716
+       _cons |    .042533    .011853     3.59   0.000     .0190989     .065967
+------------------------------------------------------------------------------
+
+. test age0_5m=age0_5f;
+
+ ( 1)  age0_5m - age0_5f = 0
+
+       F(  1,   140) =    2.04
+            Prob > F =    0.1558
+
+. local 0_5 = r(p);
+
+. test age5_15m=age5_15f;
+
+ ( 1)  age5_15m - age5_15f = 0
+
+       F(  1,   140) =    0.57
+            Prob > F =    0.4505
+
+. local 5_15 = r(p);
+
+. test ageO45m=ageO45f;
+
+ ( 1)  ageO45m - ageO45f = 0
+
+       F(  1,   140) =   11.27
+            Prob > F =    0.0010
+
+. local O45 = r(p);
+
+. test arm_free arm_mf;
+
+ ( 1)  arm_free = 0
+ ( 2)  arm_mf = 0
+
+       F(  2,   140) =    1.46
+            Prob > F =    0.2355
+
+. cap log close;

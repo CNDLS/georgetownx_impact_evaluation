@@ -1,0 +1,156 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\tableA8_attrition.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:35
+
+. use "hhinfo_bl";
+(Sample frame: All BISWA Census villages with no GOI now or planned for 2007 SRS)
+
+. gen attrition = match==0 | match==6;
+
+. tab match attrition, missing;
+
+      Household match |
+ between baseline and |       attrition
+            follow-up |         0          1 |     Total
+----------------------+----------------------+----------
+BL: Household found b |         0         68 |        68 
+    Match (household) |     1,768          0 |     1,768 
+BL+: Found, but not c |         0          8 |         8 
+----------------------+----------------------+----------
+                Total |     1,768         76 |     1,844 
+
+
+. replace head_age_bl = log(head_age_bl);
+head_age_bl was byte now float
+(1843 real changes made)
+
+. gen ratio = debtbiswa/(12*totexp_bl);
+(1 missing value generated)
+
+. gen biswad_low = ratio<.05 if ratio<.;
+(1 missing value generated)
+
+. gen biswad_high = ratio>.25 if ratio<.;
+(1 missing value generated)
+
+. local regressors = "free mf lpce_bl hhsize electricity biswad_* pcnets last_net_bl usual_net_bl head_male_bl head_age_bl head_anysch_
+> bl";
+
+. sum `regressors', sep(0);
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        free |      1844    .3400217    .4738446          0          1
+          mf |      1844     .335141    .4721678          0          1
+     lpce_bl |      1843    6.400627    .5460781   4.035346    8.82135
+   hhsize_bl |      1844    5.456616    2.220793          1         21
+electricit~l |      1838    .4205658    .4937842          0          1
+  biswad_low |      1843    .7406403    .4384023          0          1
+ biswad_high |      1843    .1378188    .3448032          0          1
+   pcnets_bl |      1836    .2995608    .3149492          0          4
+ last_net_bl |      1844    .1397387     .304142          0          1
+usual_net_bl |      1844    .5526812    .4578554          0          1
+head_male_bl |      1843    .9413999    .2349385          0          1
+ head_age_bl |      1843    3.753041    .2804342   2.890372   4.406719
+head_anysc~l |      1828    .7133479    .4523213          0          1
+
+. * Column 1 of Table A.8: Attrition between Pre and Post Intervention Household Surveys;
+. reg attrition;
+
+      Source |       SS       df       MS              Number of obs =    1844
+-------------+------------------------------           F(  0,  1843) =    0.00
+       Model |           0     0           .           Prob > F      =       .
+    Residual |   72.867679  1843  .039537536           R-squared     =  0.0000
+-------------+------------------------------           Adj R-squared =  0.0000
+       Total |   72.867679  1843  .039537536           Root MSE      =  .19884
+
+------------------------------------------------------------------------------
+   attrition |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       _cons |   .0412148   .0046305     8.90   0.000     .0321332    .0502963
+------------------------------------------------------------------------------
+
+. * Column 2;
+. reg attrition free mf, cluster(id_v);
+
+Linear regression                                      Number of obs =    1844
+                                                       F(  2,   140) =    2.27
+                                                       Prob > F      =  0.1067
+                                                       R-squared     =  0.0026
+                                                       Root MSE      =  .19869
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+   attrition |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |  -.0229702   .0143456    -1.60   0.112    -.0513322    .0053917
+          mf |  -.0031579   .0152717    -0.21   0.836    -.0333509    .0270351
+       _cons |   .0500835   .0126473     3.96   0.000     .0250792    .0750878
+------------------------------------------------------------------------------
+
+. * Column 3;
+. reg attrition `regressors', cluster(id_v);
+
+Linear regression                                      Number of obs =    1814
+                                                       F( 13,   140) =    1.31
+                                                       Prob > F      =  0.2111
+                                                       R-squared     =  0.0125
+                                                       Root MSE      =  .19861
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+   attrition |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |  -.0221793   .0143785    -1.54   0.125    -.0506063    .0062477
+          mf |  -.0006498   .0153509    -0.04   0.966    -.0309994    .0296998
+     lpce_bl |   .0107654   .0116002     0.93   0.355    -.0121688    .0336996
+   hhsize_bl |  -.0021806   .0021882    -1.00   0.321    -.0065068    .0021456
+electricit~l |   .0109883   .0098077     1.12   0.264     -.008402    .0303787
+  biswad_low |  -.0097169   .0158399    -0.61   0.541    -.0410333    .0215995
+ biswad_high |  -.0057637   .0221447    -0.26   0.795     -.049545    .0380177
+   pcnets_bl |  -.0181518   .0226529    -0.80   0.424    -.0629379    .0266342
+ last_net_bl |  -.0089663   .0158434    -0.57   0.572    -.0402896    .0223569
+usual_net_bl |   .0006511   .0167203     0.04   0.969    -.0324057     .033708
+head_male_bl |   .0077886    .018763     0.42   0.679    -.0293068     .044884
+ head_age_bl |  -.0502576   .0189545    -2.65   0.009    -.0877317   -.0127836
+head_anysc~l |  -.0241681   .0126354    -1.91   0.058     -.049149    .0008129
+       _cons |   .2002558   .1077084     1.86   0.065    -.0126895    .4132011
+------------------------------------------------------------------------------
+
+. * Column 4;
+. reg attrition `regressors' biom_mal biom_anem, cluster(id_v);
+
+Linear regression                                      Number of obs =    1645
+                                                       F( 15,   140) =    1.44
+                                                       Prob > F      =  0.1385
+                                                       R-squared     =  0.0165
+                                                       Root MSE      =  .19271
+
+                                 (Std. Err. adjusted for 141 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+   attrition |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        free |   -.020713    .013496    -1.53   0.127    -.0473953    .0059693
+          mf |   .0043254   .0147692     0.29   0.770    -.0248741    .0335249
+     lpce_bl |   .0143752   .0111694     1.29   0.200    -.0077073    .0364576
+   hhsize_bl |  -.0012111   .0022523    -0.54   0.592     -.005664    .0032419
+electricit~l |   .0107317   .0103129     1.04   0.300    -.0096574    .0311209
+  biswad_low |  -.0205466   .0166246    -1.24   0.219    -.0534143    .0123211
+ biswad_high |  -.0124403   .0224174    -0.55   0.580    -.0567606      .03188
+   pcnets_bl |  -.0346588   .0214182    -1.62   0.108    -.0770038    .0076863
+ last_net_bl |   .0015032    .016527     0.09   0.928    -.0311715    .0341779
+usual_net_bl |   .0088898   .0169533     0.52   0.601    -.0246278    .0424074
+head_male_bl |   .0245335   .0171461     1.43   0.155    -.0093652    .0584322
+ head_age_bl |  -.0534871   .0195455    -2.74   0.007    -.0921295   -.0148446
+head_anysc~l |   -.028771   .0121504    -2.37   0.019    -.0527929   -.0047491
+ biom_mal_bl |  -.0045239   .0130798    -0.35   0.730    -.0303834    .0213355
+biom_anem_bl |   .0050677   .0114029     0.44   0.657    -.0174764    .0276118
+       _cons |   .1728569    .109491     1.58   0.117    -.0436127    .3893265
+------------------------------------------------------------------------------
+
+. cap log close;

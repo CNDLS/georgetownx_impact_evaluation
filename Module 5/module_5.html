@@ -1,0 +1,397 @@
+<center>
+<h1><a href="#module-5-stata-tutorial" id="module-5-stata-tutorial">Module 5 Stata Tutorial</a></h1>
+</center>
+<p>This tutorial introduces the Stata commands associated with the content in <strong>Module 5: Regression</strong>.</p>
+<p>We use data from a randomized controlled trial (RCT) in Malawi in which individuals were provided varying incentives to learn their HIV status after receiving an HIV test.<sup><a href="#myfootnote1">1</a></sup> The data can be downloaded <a href="https://www.aeaweb.org/aer/data/dec08/20060732_data.zip">here</a> or from the course web page. The Abdul Latif Jameel Poverty Action Lab provides a <a href="https://www.povertyactionlab.org/evaluation/demand-and-impact-learning-hiv-status-malawi">detailed description</a> of the intervention.</p>
+<p>The data is contained in a compressed (zip) file. The extracted file contains the Stata .do files used by the author, the data, and a document describing the data. We will use the data (Thornton HIV Testing AER.dta) and the PDF describing the data (Readme.pdf) in this tutorial.</p>
+<h2><a href="#part-1-getting-started" id="part-1-getting-started">Part 1: Getting started</a></h2>
+<p>All of the commands in this tutorial should be written in a single Stata .do file. An example Module 5 .do file can be downloaded from the course page. To start a .do file, type <code>doedit</code> into the Stata command line then hit enter. You should save the file to a location where you will remember by selecting <code>File</code> then <code>Save as</code> from the menu (the upper left corner) of the .do file.</p>
+<p>At the start of the .do file, enter the commands <code>drop _all</code> and <code>set more off</code>. The first command removes any data from Stata&rsquo;s memory so that the script can run cleanly. The second command instructs Stata to execute the entire .do file at once instead of waiting for keyboard inputs at certain points. Both commands should go at the start of almost every .do file.</p>
+<p>In the answer, note that any line that begins with a period and then space is the input (you should only type the command that follows in the .do file). Any other lines are outputs from Stata.</p>
+<details>
+<summary>Task 1</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Clear Stata&rsquo;s memory and set the <code>more</code> option to <code>off</code></p>
+<hr />
+</details>
+<details>
+<summary>Execution 1</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. drop _all
+
+. set more off
+
+</code></pre>
+<hr />
+</details>
+<p>The next step is to use the command <code>cd</code> to set the working directory to the folder containing the data. For help using the command, you may type <code>help cd</code> in the Stata command line and then hit enter.<sup><a href="#myfootnote1">2</a></sup></p>
+<details>
+<summary>Task 2</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Set the working directory to the folder containing the file <strong>Thornton HIV Testing AER.dta</strong></p>
+<hr />
+</details>
+<details>
+<summary>Execution 2</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<p>Suppose that the data is stored in the directory <code>/mass_storage/WB/Module 5/Data</code>. Then the command would be</p>
+<pre><code>. cd &quot;/mass_storage/WB/Module 5/Data&quot;
+/mass_storage/WB/Module 5/Data
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> The quotations are only necessary if there are spaces in the folder path. On Windows, a backslash may be used in place of a forward slash, but forward slashes are recommended for compatibility with other operating systems.</p>
+<hr />
+</details>
+<p>Finally, we need to input the data. Since the data is in Stata (.dta) format, we use the command <code>use</code>. Type <code>help use</code> in the Stata command line and then hit enter for an explanation of how this command works. After importing the file, use the command <code>describe</code> to describe the data.</p>
+<details>
+<summary>Task 3</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Import <strong>Thornton HIV Testing AER.dta</strong> into Stata and describe the data.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 3</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. use &quot;Thornton HIV Testing Data.dta&quot;, clear
+
+. describe
+
+Contains data from Thornton HIV Testing Data.dta
+  obs:         4,820                          
+ vars:            44                          12 Mar 2008 11:10
+ size:       785,660                          (_dta has notes)
+------------------------------------------------------------------------------------------------------------
+              storage   display    value
+variable name   type    format     label      variable label
+------------------------------------------------------------------------------------------------------------
+site            float   %9.0g                 1=Mchinji 2=Balaka 3=Rumphi
+rumphi          float   %9.0g                 Rumphi
+balaka          float   %9.0g                 Balaka
+villnum         double  %9.0g                 VILLNUM
+m1out           float   %9.0g                 Survey outcome in 1998
+m2out           float   %9.0g                 Survey outcome in 2001
+survey2004      float   %9.0g                 completed baseline survey
+got             float   %9.0g                 Got HIV results
+zone            float   %9.0g                 VCT zone
+distvct         float   %9.0g                 Distance in km
+tinc            float   %9.0g                 Total value of the incentive (kwacha)
+Ti              float   %9.0g                 Value of incentive (kwacha) discrete
+any             float   %9.0g                 Received any incentive
+under           float   %9.0g                 under 1.5 km
+over            float   %9.0g                 over 1.5 km
+simaverage      float   %9.0g                 (mean) simaverage
+age             float   %10.0g                Age
+age2            float   %9.0g                 Age squared
+male            float   %9.0g                 Gender
+mar             float   %9.0g                 Married at baseline
+educ2004        float   %9.0g                 Yrs of completed education
+timeshadsex_s   byte    %8.0g                 Times per month had sex (subsample)
+hadsex12        float   %9.0g                 Had sex in past 12 months (baseline)
+eversex         float   %9.0g                 Ever had sex at baseline
+usecondom04     float   %9.0g                 Used a condom during last year at baseline
+tb              float   %9.0g                 HIV Test before baseline
+thinktreat      float   %9.0g                 Think there will be ARV treatment in the future
+a8              byte    %8.0g      A8         Likelihood of HIV infection
+land2004        float   %9.0g                 Owned any land at baseline
+T_consentsti    long    %8.0g      yesno      consent to sti test
+T_consenthiv    long    %8.0g      yesno      consent to hiv test
+T_final_trich~t float   %9.0g      res        final trich results
+T_final_resul~t float   %23.0g     otherres   final CT results
+T_final_resul~c float   %23.0g     otherres   final GC results
+hiv2004         float   %9.0g                 HIV results
+test2004        float   %9.0g                 HIV test in 2004
+followup_tested byte    %8.0g                 Different HIV testing sample. Drop from analysis
+followupsurvey  float   %9.0g                 Was interviewed at follow-up
+havesex_fo      byte    %10.0g                Had sex between baseline and follow-up
+numsex_fo       byte    %10.0g                Num partners between baseline and follow-up
+likelihoodhiv~o int     %10.0g                Likelihood of infection at follow-up
+numcond         float   %9.0g                 Number of condoms purchased at follow-up
+anycond         float   %9.0g                 Any condoms purchased at the follow-up
+bought          float   %9.0g                 Bought condoms on own at follow-up
+------------------------------------------------------------------------------------------------------------
+Sorted by: 
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> The quotations around the file name are necessary since there are spaces in the name. The option <code>clear</code> is not necessary since there is no data in Stata&rsquo;s memory, but is recommended in case you only run part of the .do file.</p>
+<hr />
+</details>
+<h2><a href="#part-2-factor-variables" id="part-2-factor-variables">Part 2: Factor variables</a></h2>
+<p>A <strong>factor variable</strong> is a variable in which each value represents a specific value or category. The values of a factor variable are called <strong>levels</strong>. A binary variable is a factor variable with 2 levels. For instance, the variable treatment status typically has the levels &ldquo;Treatment&rdquo; and &ldquo;Control.&rdquo;</p>
+<p>A factor variable can also have more than 2 levels. For example, the variable <code>site</code> in the HIV data that we are using records the &ldquo;region of Malawi where the study was conducted.&rdquo;</p>
+<p>Factor variables may be stored as <strong>string</strong> variables. For example, the values of the variable treatment could be &ldquo;Treatment&rdquo; and &ldquo;Control&rdquo; in Stata. They can also be stored as <strong>numeric</strong> variables in which numbers are used to represent levels. For instance, 0 could represent control and 1 could represent treatment. To use factor variables in Stata, they must be in a numeric format.</p>
+<p>The variable <code>tinc</code> indicates the value of the financial incentive given to the study participant. Generate a new variable called <code>treat_string</code> that takes on a value of &ldquo;Treatment&rdquo; if the participant received a positive incentive, &ldquo;Control&rdquo; if they received 0 incentive, and missing (for strings this is &quot;&quot;) if <code>tinc</code> is missing.</p>
+<details>
+<summary>Task 4</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Generate a string variable called <code>treat_string</code> that takes on a value of &ldquo;Treatment&rdquo; if <code>tinc</code> is positive, and is given a value of &ldquo;Control&rdquo; if <code>tinc</code> is 0. The variable <code>treat_string</code> should be coded as missing if <code>tinc</code> is missing.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 4</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. generate treat_string = cond(tinc&gt;0, &quot;Treatment&quot;, &quot;Control&quot;)
+
+. replace treat_string = &quot;&quot; if missing(tinc)
+(1,919 real changes made)
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> There are multiple ways to accomplish this task. To see if your approach is valid, generate a new variable called <code>treat2</code> using the method included here, then enter the command <code>assert treat_string == treat2</code>. If Stata returns &ldquo;assertion is false&rdquo; in red, you made a mistake. Otherwise, your method is fine.</p>
+<hr />
+</details>
+<p>The variable that we just generated is a string variable, but we need it to be in numeric format for use in analysis. Use the <code>generate</code> command to obtain a numeric variable called <code>treatment</code> that takes on a value of 0 if <code>treat_string</code> is equal to &ldquo;Control&rdquo;, 1 if it is equal to &ldquo;Treatment,&rdquo; and is given a missing value if <code>treat_string</code> is missing. Label the values of the variable and the variable itself appropriately. (Hint: Look for the <code>group</code> command in <code>egen</code> and use the <code>label</code> option.) Labeling a variable shows &ldquo;Treatment&rdquo; instead of 1 when the Stata user looks at it, but the data is still stored as a number. This makes it clear what each category is while getting the variable into a usable format.</p>
+<details>
+<summary>Task 5</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Generate a numeric variable called <code>treatment</code> that takes on a value of 0 if <code>treat_string</code> is equal to &ldquo;Control&rdquo;, 1 if it is equal to &ldquo;Treatment,&rdquo; and is given a missing value if <code>treat_string</code> is missing. Label the variable <code>treatment</code> and its values appropriately.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 5</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. generate treatment = cond(treat_string==&quot;Treatment&quot;, 1, 0)
+
+. replace treatment = . if missing(treat_string)
+(1,919 real changes made, 1,919 to missing)
+
+. label var treatment &quot;Treatment&quot;
+
+. label define treatment 0 &quot;Control&quot; 1 &quot;Treatment&quot;
+
+. label val treatment treatment
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> There are several other ways to obtain the same result. Note that the value labels of <code>treatment</code> are equal to the string values from <code>treat_string</code>.</p>
+<hr />
+</details>
+<p>We may count the number of times each level of a factor variable occurs using the <code>tabulate</code> Stata command. We may also use Stata for a cross tabulation in which we count the number of times levels of one factor variable occur within each level of another. This uses the same command. Tabulate <code>site</code>, and then obtain the cross-tabulation of <code>site</code> by <code>treatment</code>.</p>
+<details>
+<summary>Task 6 </summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Use Stata to tabulate the values of <code>treatment</code> and cross-tabulate <code>site</code> by <code>treatment</code></p>
+<hr />
+</details>
+<details>
+<summary>Execution 6</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. tabulate site
+
+  1=Mchinji |
+   2=Balaka |
+   3=Rumphi |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      1,571       32.59       32.59
+          2 |      1,607       33.34       65.93
+          3 |      1,642       34.07      100.00
+------------+-----------------------------------
+      Total |      4,820      100.00
+
+. tabulate site treatment
+
+ 1=Mchinji |
+  2=Balaka |       Treatment
+  3=Rumphi |   Control  Treatment |     Total
+-----------+----------------------+----------
+         1 |       136        668 |       804 
+         2 |       129        917 |     1,046 
+         3 |       414        637 |     1,051 
+-----------+----------------------+----------
+     Total |       679      2,222 |     2,901 
+
+
+</code></pre>
+<hr />
+</details>
+<h2><a href="#part-3-regressions-in-stata" id="part-3-regressions-in-stata">Part 3: Regressions in Stata</a></h2>
+<p>Recall from the <strong>Module 5</strong> lesson that we can use regressions to estimate the treatment effect of an intervention. The variable <code>got</code> indicates whether or not the respondent received the results of their HIV test. Use the <code>regress</code> command to calculate the treatment effect of being offered any monetary incentive to learn HIV results. Refer to the <strong>Module 5</strong> videos for detailed instructions on how to interpret the results.</p>
+<details>
+<summary>Task 7</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Run a regression of <code>got</code> on <code>treatment</code></p>
+<hr />
+</details>
+<details>
+<summary>Execution 7</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. regress got treatment, robust
+
+Linear regression                               Number of obs     =      2,834
+                                                F(1, 2832)        =     466.60
+                                                Prob &gt; F          =     0.0000
+                                                R-squared         =     0.1628
+                                                Root MSE          =     .42325
+
+------------------------------------------------------------------------------
+             |               Robust
+         got |      Coef.   Std. Err.      t    P&gt;|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   treatment |   .4505519    .020858    21.60   0.000     .4096535    .4914502
+       _cons |   .3386838   .0189675    17.86   0.000     .3014922    .3758754
+------------------------------------------------------------------------------
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> The dependent variable is always listed first followed by all independent variables. The option <code>robust</code> instructs Stata to calculate standard errors that are robust to heteroskedasticity<sup><a href="#myfootnote3">3</a></sup>. A binary dependent variable introduces heteroskedasticity by construction, so this option is necessary.</p>
+<p>The treatment effect is 0.4506, or about 45 percentage points, compared to a control group average, measured by the constant term, of about 34 percent (0.3387).  The treatment effect has a p-value of 0.000, and the 95% confidence interval is from about 41 to 49 percentage points.</p>
+<hr />
+</details>
+<p>Recall from the <strong>Module 5</strong> videos that the value of the coefficient on <code>treatment</code> is equal to the difference in the mean of <code>got</code> across treatment groups. Use the <code>summarize</code> command to confirm that the regression coefficient is equal to the difference in means.</p>
+<details>
+<summary>Task 8</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Calculate the mean of <code>got</code> among those that were treated and were not treated.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 8</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. summarize got if treatment == 0
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+         got |        623    .3386838    .4736425          0          1
+
+. summarize got if treatment == 1
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+         got |      2,211    .7892356    .4079436          0          1
+
+</code></pre>
+<p>Notes: Note that the average in the control group in this table is indeed the same as the constant term in the earlier regression.  Also, the sum of the constant term and the treatment effect in the regression table is equal to the average in the treatment group.</p>
+<hr />
+</details>
+<p>Now, suppose that we wish to control for age. Add this to the regression.</p>
+<details>
+<summary>Task 9</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Add the control variable <code>age</code> to the regression of <code>got</code> on <code>treatment</code></p>
+<hr />
+</details>
+<details>
+<summary>Execution 9</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. regress got treatment age, robust
+
+Linear regression                               Number of obs     =      2,829
+                                                F(2, 2826)        =     239.63
+                                                Prob &gt; F          =     0.0000
+                                                R-squared         =     0.1644
+                                                Root MSE          =     .42272
+
+------------------------------------------------------------------------------
+             |               Robust
+         got |      Coef.   Std. Err.      t    P&gt;|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   treatment |   .4470084   .0209177    21.37   0.000     .4059929    .4880239
+         age |   .0016316   .0005852     2.79   0.005     .0004842     .002779
+       _cons |   .2873536   .0263302    10.91   0.000     .2357253     .338982
+------------------------------------------------------------------------------
+
+</code></pre>
+<p>Notes: The coefficient does not change much at all, which is what we would tend to expect.  Note also that the statistical significance of the treatment effect estimate, as measured by the confidence interval, is also largely unaffected by including the age control.</p>
+<hr />
+</details>
+<p>The treatment effect may be different between men and women. Include an interaction between <code>treatment</code> and <code>male</code> to test for heterogeneous treatment effects. This is most easily done by generating a new variable equal to <code>treatment</code>*<code>male</code> to capture the interaction and including it in the regression.</p>
+<details>
+<summary>Task 10</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Regress <code>got</code> on <code>treatment</code>, <code>male</code>, and an interaction between <code>treatment</code> and <code>male</code>.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 10</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. generate treatxmale = treatment*male
+(1,919 missing values generated)
+
+. 
+. regress got treatment male treatxmale, robust
+
+Linear regression                               Number of obs     =      2,834
+                                                F(3, 2830)        =     155.76
+                                                Prob &gt; F          =     0.0000
+                                                R-squared         =     0.1630
+                                                Root MSE          =     .42336
+
+------------------------------------------------------------------------------
+             |               Robust
+         got |      Coef.   Std. Err.      t    P&gt;|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   treatment |   .4469463   .0287582    15.54   0.000     .3905571    .5033356
+        male |  -.0165726   .0379771    -0.44   0.663    -.0910382    .0578931
+  treatxmale |   .0074354   .0417869     0.18   0.859    -.0745004    .0893713
+       _cons |   .3465046   .0262533    13.20   0.000     .2950269    .3979822
+------------------------------------------------------------------------------
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> The coefficient on the interaction term (treatxmale) of .0074354 is not statistically significant, so we cannot conclude that the treatment had a differential effect on men and women.</p>
+<hr />
+</details>
+<p>We cannot conclude that the treatment effect is different for men than for women, but perhaps financial incentives matter more to older individuals. Run a regression to test this hypothesis.</p>
+<details>
+<summary>Task 11</summary>
+<hr />
+<p><strong>Task</strong></p>
+<p>Regress <code>got</code> on <code>treatment</code>, <code>age</code>, and an interaction between <code>treatment</code> and <code>age</code>.</p>
+<hr />
+</details>
+<details>
+<summary>Execution 11</summary>
+<hr />
+<p><strong>Execution</strong></p>
+<pre><code>. generate treatxage = treatment*age
+(1,924 missing values generated)
+
+. regress got treatment age treatxage, robust
+
+Linear regression                               Number of obs     =      2,829
+                                                F(3, 2825)        =     160.78
+                                                Prob &gt; F          =     0.0000
+                                                R-squared         =     0.1649
+                                                Root MSE          =     .42267
+
+------------------------------------------------------------------------------
+             |               Robust
+         got |      Coef.   Std. Err.      t    P&gt;|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   treatment |   .5074047   .0555187     9.14   0.000     .3985434    .6162661
+         age |   .0031301    .001485     2.11   0.035     .0002183    .0060419
+   treatxage |  -.0018617   .0016136    -1.15   0.249    -.0050256    .0013022
+       _cons |   .2392093   .0503181     4.75   0.000     .1405453    .3378733
+------------------------------------------------------------------------------
+
+</code></pre>
+<hr />
+<p><strong>Notes:</strong> The coefficient on the interaction term (treatxage) of -.0018617 is again not statistically significant so we cannot conclude that age impacts the effectiveness of the intervention.</p>
+<hr />
+</details>
+<hr />
+<h2><a href="#footnotes" id="footnotes">Footnotes</a></h2>
+<p><a name="myfootnote1">1</a>: Thornton, Rebecca L. 2008. &ldquo;The Demand for, and Impact of, Learning HIV Status.&rdquo; <em>American Economic Review</em>, 98 (5): 1829-63.</p>
+<p><a name="myfootnote2">2</a>: The same method brings up the help pages for all Stata commands.</p>
+<p><a name="myfootnote2">3</a>: Heteroskedasticity is present if variance is different for various sub-populations.</p>

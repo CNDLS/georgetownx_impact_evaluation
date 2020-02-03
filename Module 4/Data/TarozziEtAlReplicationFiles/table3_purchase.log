@@ -1,0 +1,168 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table3_purchase.log
+  log type:  text
+ opened on:  12 Oct 2013, 13:06:13
+
+. * Import only data from MF villages to study demand for ITNs. Include only panel households;
+. use "hhinfo_bl" if match==1;
+(Sample frame: All BISWA Census villages with no GOI now or planned for 2007 SRS)
+
+. gen debtpc = (debtot_bl/hhsize)^.25;
+
+. gen debtpcbsw = (debtbiswa_bl/hhsize)^.25;
+
+. gen pcinc = (income/hhsize)^.25;
+(12 missing values generated)
+
+. gen pccost = (costm_bl/hhsize)^.25;
+
+. gen cost =  (exp_cost_wm_bl)^.25;
+
+. gen headillit =  head_anysch_bl==0;
+
+. sum costm_bl if costm_bl>0 & vtype==3, d;
+
+          Total cost of malaria episodes last 6mts
+                         (itemized)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           50             10
+ 5%           90             15
+10%          200             50       Obs                 237
+25%          350             50       Sum of Wgt.         237
+
+50%          860                      Mean            1721.46
+                        Largest       Std. Dev.      2687.514
+75%         2000          10400
+90%         4040          10520       Variance        7222733
+95%         5408          12170       Skewness       5.854644
+99%        10520          29900       Kurtosis       54.54143
+
+. local wealth = "lpce_bl debtpcbsw";
+
+. local demog = "hhsize dem_u5_bl dem_young_bl dem_elderly_bl head_male_bl head_age_bl headill head_highed_bl";
+
+. local netsmal = "pccost last_net_bl last_itn_bl nets_bl itns_bl usual_net_bl mal_deaths5_bl cost biom_anem_bl biom_mal_bl selfmf_bl";
+
+. local prefbeliefs = "pref_riskaverse_bl pref_hyperb_bl pref_impatient_bl p_gamma_bl p_itn_bl";
+
+. * This replicates the results in Table 3 of the paper;
+. reg somenets_ic `wealth' `demog' `netsmal' `prefbeliefs' if vtype==3, cluster(id_v);
+
+Linear regression                                      Number of obs =     513
+                                                       F( 26,    46) =    5.37
+                                                       Prob > F      =  0.0000
+                                                       R-squared     =  0.1078
+                                                       Root MSE      =  .48382
+
+                                  (Std. Err. adjusted for 47 clusters in id_v)
+------------------------------------------------------------------------------
+             |               Robust
+ somenets_ic |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     lpce_bl |  -.1164725   .0526427    -2.21   0.032    -.2224366   -.0105083
+   debtpcbsw |  -.0045273   .0091894    -0.49   0.625    -.0230247      .01397
+   hhsize_bl |  -.0086327   .0180043    -0.48   0.634    -.0448736    .0276081
+   dem_u5_bl |  -.0023506   .0414246    -0.06   0.955     -.085734    .0810328
+dem_young_bl |   .0379161    .023248     1.63   0.110    -.0088797    .0847118
+dem_elderl~l |   .0412883   .0358597     1.15   0.256    -.0308935    .1134701
+head_male_bl |  -.0244131   .0870384    -0.28   0.780    -.1996123    .1507861
+ head_age_bl |  -.0014713   .0019854    -0.74   0.462    -.0054676     .002525
+   headillit |   .0418627   .0584107     0.72   0.477     -.075712    .1594375
+head_highe~l |   .0669015   .0744673     0.90   0.374    -.0829935    .2167964
+      pccost |   .0192589   .0102753     1.87   0.067    -.0014242    .0399421
+ last_net_bl |   .2069097    .092972     2.23   0.031     .0197668    .3940525
+ last_itn_bl |  -.0549436   .2780316    -0.20   0.844    -.6145922     .504705
+     nets_bl |   .0073885    .026244     0.28   0.780     -.045438    .0602151
+     itns_bl |  -.0322162   .0362043    -0.89   0.378    -.1050918    .0406594
+usual_net_bl |  -.0344067    .078764    -0.44   0.664    -.1929505    .1241371
+mal_deaths~l |    .102604    .141042     0.73   0.471    -.1812988    .3865068
+        cost |   .0138399   .0192816     0.72   0.477    -.0249719    .0526517
+biom_anem_bl |  -.0041044   .0489926    -0.08   0.934    -.1027213    .0945125
+ biom_mal_bl |   .2025176   .0797814     2.54   0.015     .0419259    .3631092
+   selfmf_bl |   .2628868   .1174214     2.24   0.030     .0265298    .4992439
+pref_riska~l |  -.0197154   .0421004    -0.47   0.642    -.1044592    .0650284
+pref_hyper~l |   .0202355   .0350666     0.58   0.567    -.0503499     .090821
+pref_impat~l |   .0138908   .0465049     0.30   0.767    -.0797187    .1075004
+  p_gamma_bl |  -.0660393   .1064046    -0.62   0.538    -.2802206    .1481421
+    p_itn_bl |  -.1388553   .1423648    -0.98   0.334    -.4254208    .1477102
+       _cons |   1.296193   .4007831     3.23   0.002     .4894581    2.102927
+------------------------------------------------------------------------------
+
+. * This shows that using probit (here showing marginal effects) produces approximately the same results;
+. dprobit somenets_ic `wealth' `demog' `netsmal' `prefbeliefs' if vtype==3, cluster(id_v);
+
+Iteration 0:   log pseudolikelihood = -354.10062
+Iteration 1:   log pseudolikelihood = -325.23733
+Iteration 2:   log pseudolikelihood = -325.05034
+Iteration 3:   log pseudolikelihood = -325.05031
+
+Probit regression, reporting marginal effects           Number of obs =    513
+                                                        Wald chi2(26) = 100.08
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -325.05031                       Pseudo R2     = 0.0820
+
+                                  (Std. Err. adjusted for 47 clusters in id_v)
+------------------------------------------------------------------------------
+         |               Robust
+somene~c |      dF/dx   Std. Err.      z    P>|z|     x-bar  [    95% C.I.   ]
+---------+--------------------------------------------------------------------
+ lpce_bl |  -.1245293   .0575107    -2.17   0.030   6.46097  -.237248  -.01181
+debtpc~w |  -.0046929   .0097798    -0.48   0.631   1.73908  -.023861  .014475
+hhsize~l |  -.0079375   .0195921    -0.40   0.686   5.38596  -.046337  .030462
+dem_u5~l |  -.0061608   .0441522    -0.14   0.889   .465887  -.092697  .080376
+dem_yo~l |   .0393294   .0255784     1.54   0.124   1.08577  -.010803  .089462
+dem_el~l |   .0473079   .0395063     1.19   0.233   .323587  -.030123  .124739
+head_m~l*|  -.0317104   .0922604    -0.34   0.732   .929825  -.212538  .149117
+he~ge_bl |  -.0017934   .0020847    -0.86   0.391   44.4405  -.005879  .002292
+headil~t*|   .0438395   .0615229     0.71   0.478   .265107  -.076743  .164422
+head_h~l*|    .071615   .0786349     0.90   0.368   .126706  -.082506  .225737
+  pccost |   .0205727   .0107103     1.92   0.055   1.60454  -.000419  .041564
+last_n~l |   .2189545   .1030225     2.12   0.034   .158323   .017034  .420875
+last_i~l |   -.053329   .2934637    -0.18   0.856   .029516  -.628507  .521849
+ nets_bl |   .0080759   .0280384     0.29   0.773    1.7037  -.046878   .06303
+ itns_bl |  -.0367067   .0403618    -0.91   0.364   .315789  -.115814  .042401
+usual_~l |  -.0388458   .0837246    -0.46   0.643   .569732  -.202943  .125251
+mal_de~l |   .1115597   .1629184     0.69   0.493   .017544  -.207754  .430874
+    cost |   .0146825    .020744     0.71   0.479   6.99164  -.025975   .05534
+biom_a~l |  -.0067701   .0511867    -0.13   0.895   .462151  -.107094  .093554
+biom_m~l |   .2210917   .0915226     2.42   0.016   .108512   .041711  .400473
+selfmf~l |   .2878583   .1290352     2.23   0.026   .163865   .034954  .540763
+pref_r~l*|  -.0203396    .044719    -0.45   0.649   .479532  -.107987  .067308
+pref_h~l |   .0234497    .035479     0.66   0.510   .327485  -.046088  .092987
+pref_i~l*|   .0169311   .0494794     0.34   0.733   .272904  -.080047  .113909
+p_gamm~l |  -.0670438   .1152841    -0.58   0.561   .381027  -.292996  .158909
+p_itn_bl |  -.1614579     .15196    -1.06   0.287   .853996  -.459294  .136378
+---------+--------------------------------------------------------------------
+  obs. P |   .5380117
+ pred. P |   .5415131  (at x-bar)
+------------------------------------------------------------------------------
+(*) dF/dx is for discrete change of dummy variable from 0 to 1
+    z and P>|z| correspond to the test of the underlying coefficient being 0
+
+. /* The following maps the variables in the stata code into the variables displayed in Table 3 of the paper;
+> 
+> lpce_bl         (monthly total expenditure per head)
+> debtpcbsw       Debt towards BISWA (per head, quartic root)
+> pccost          Cost of malaria episodes last 6 months (per capita, quartic root)
+> last_net_bl     % members who slept under net last night
+> last_itn_bl     % members who slept under ITN last night
+> nets_bl         # nets owned by household
+> itns_bl         # nets treated last 6 months
+> usual_net_bl    % members using nets during peak season
+> mal_deaths5_bl  Any malaria-related deaths last 5 yrs
+> cost            Expected cost of a malaria episode (quartic root)
+> biom_mal_bl     % tested members positive for malaria
+> selfmf_bl       % members with self-reported malaria episodes last 6 months
+> p_gamma_bl      Subjective P(malaria | untreated net) - P(malaria | ITN)
+> p_itn_bl        Subjective P(malaria | no net) - P(malaria | ITN)
+> 
+> */
+> 
+> log close;
+      name:  <unnamed>
+       log:  C:\Users\tarozzino\Dropbox\Experimental\AERR\Final\Stata\table3_purchase.log
+  log type:  text
+ closed on:  12 Oct 2013, 13:06:13
+---------------------------------------------------------------------------------------------------------------------------------------
